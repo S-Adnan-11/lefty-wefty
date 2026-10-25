@@ -2,6 +2,8 @@ class Business < ApplicationRecord
   belongs_to :owner, class_name: "User"
   has_many :products, dependent: :restrict_with_exception
   has_many :inventory_logs, dependent: :restrict_with_exception
+  has_many :orders, dependent: :restrict_with_exception
+  has_many :sale_submissions, dependent: :restrict_with_exception
 
   attr_readonly :owner_id, :currency, :timezone
   normalizes :name, with: ->(name) { name.strip }

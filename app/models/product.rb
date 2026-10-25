@@ -4,6 +4,8 @@ class Product < ApplicationRecord
 
   belongs_to :business
   has_many :inventory_logs, dependent: :restrict_with_exception
+  has_many :order_items, dependent: :restrict_with_exception
+  has_many :orders, through: :order_items
   attr_readonly :business_id, :quantity
 
   normalizes :name, with: ->(value) { value.strip }

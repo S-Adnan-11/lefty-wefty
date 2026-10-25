@@ -2,8 +2,10 @@ class InventoryLog < ApplicationRecord
   belongs_to :business
   belongs_to :product
   belongs_to :actor, class_name: "User"
+  belongs_to :order_item, optional: true
+  belongs_to :reversal_of, class_name: "InventoryLog", optional: true
 
-  validates :kind, inclusion: { in: %w[opening receipt adjustment] }
+  validates :kind, inclusion: { in: %w[opening receipt adjustment sale sale_void] }
   validates :quantity_delta, numericality: { only_integer: true, other_than: 0, greater_than_or_equal_to: -Product::MAX_QUANTITY, less_than_or_equal_to: Product::MAX_QUANTITY }
   validates :resulting_balance, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: Product::MAX_QUANTITY }
   validates :reason, presence: true, length: { maximum: 500 }
