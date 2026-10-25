@@ -4,6 +4,10 @@ Rails.application.routes.draw do
   post "signup", to: "signups#create"
   resource :session, only: %i[new create destroy]
   resources :passwords, param: :token, only: %i[new create edit update]
+  resources :orders do
+    post :confirm, on: :member
+    post :void, on: :member
+  end
   resources :products, only: %i[index show new create edit update] do
     post :archive, on: :member
     resources :stock_movements, only: :create

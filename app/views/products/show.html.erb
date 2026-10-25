@@ -28,7 +28,7 @@
     <div class="table-scroll" tabindex="0" role="region" aria-label="Movement history table"><table id="movement-history">
       <caption class="sr-only">Stock movements for <%= @product.name %></caption>
       <thead><tr><th scope="col">When</th><th scope="col">Type / reason</th><th scope="col">Change</th><th scope="col">Balance</th><th scope="col">Recorded by</th></tr></thead>
-      <tbody><% @movements.each do |movement| %><tr><td><%= local_time(movement.created_at) %></td><td><%= movement.kind.humanize %><small><%= movement.reason %></small></td><td class="numeric"><%= signed_units(movement.quantity_delta) %></td><td class="numeric"><%= movement.resulting_balance %></td><td><%= movement.actor.email_address %></td></tr><% end %></tbody>
+      <tbody><% @movements.each do |movement| %><tr><td><%= local_time(movement.created_at) %></td><td><%= movement.kind.humanize %><small><%= movement.reason %></small><% if movement.order_item %><%= link_to "Sale ##{movement.order_item.order_id}", order_path(movement.order_item.order_id) %><small>Movement #<%= movement.id %><% if movement.reversal_of_id %> reverses #<%= movement.reversal_of_id %><% end %></small><% end %></td><td class="numeric"><%= signed_units(movement.quantity_delta) %></td><td class="numeric"><%= movement.resulting_balance %></td><td><%= movement.actor.email_address %></td></tr><% end %></tbody>
     </table></div>
     <%= render "shared/pagination" %>
   <% end %>

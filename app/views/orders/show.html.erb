@@ -1,0 +1,38 @@
+<% content_for :title, "Sale ##{@order.id} · Lefty-Wefty" %>
+<p><%= link_to "← Sales", orders_path %></p>
+<div class="page-heading"><div><p class="eyebrow"><%= @order.state %></p><h1>Sale #<%= @order.id %></h1></div><% if @order.draft? %><%= link_to "Edit draft", edit_order_path(@order), class: "button button-secondary" %><% end %></div>
+<% if @error %><div class="errors" role="alert"><%= @error %></div><% end %>
+<section class="card">
+  <h2><%= @order.draft? ? "Review draft" : "Recorded sale" %></h2>
+  <% if @order.draft? %><p>Stock is not reserved. Confirmation rechecks current prices, active products, and availability. A revised price requires another review.</p><% else %>
+    <p>Confirmed <%= local_time(@order.confirmed_at) %> by <%= @order.confirmed_by.email_address %>. These product details and amounts are the original sale snapshots.</p>
+  <% end %>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Sale items table"><table id="sale-items">
+    <caption class="sr-only">Items for sale #<%= @order.id %></caption>
+    <thead><tr><th scope="col">Product / SKU</th><th scope="col">Quantity</th><th scope="col">Unit price</th><th scope="col">Line total</th><th scope="col"><%= @order.draft? ? "Available now" : "Stock history" %></th></tr></thead>
+    <tbody><% @items.each do |item| %><% line = @order.draft? ? @order.quote.find { |q| q["product_id"] == item.product_id } : nil %>
+      <tr><td><%= line ? line.fetch("name") : item.product_name %><small><%= line ? line.fetch("sku") : item.product_sku %></small></td><td class="numeric"><%= item.quantity %></td><td class="numeric"><%= money_minor(line ? line.fetch("unit_price_minor") : item.unit_price_minor) %></td><td class="numeric"><%= money_minor(line ? line.fetch("line_total_minor") : item.line_total_minor) %></td>
+      <td><% if @order.draft? %><%= item.product.quantity %><% if item.product.archived? %><small>Archived — edit draft</small><% end %><% else %><%= link_to "Product movements", product_path(item.product) %><% item.inventory_logs.sort_by(&:id).each do |movement| %><small><%= movement.kind.humanize %> #<%= movement.id %>: <%= signed_units(movement.quantity_delta) %><% if movement.reversal_of_id %> (reverses #<%= movement.reversal_of_id %>)<% end %></small><% end %><% end %></td></tr>
+    <% end %></tbody>
+  </table></div>
+  <p class="sale-total">Total: <strong id="sale-total"><%= money_minor(@order.total_minor) %></strong></p>
+</section>
+<% if @order.draft? %>
+  <section class="card form-card"><h2>Confirm this sale</h2><p>Record the reviewed sale and deduct every item's stock together. No money is collected.</p>
+    <%= form_with url: confirm_order_path(@order), data: { pending: true } do %>
+      <%= hidden_field_tag :revision, @order.revision %><%= hidden_field_tag :review_token, @order.review_token %>
+      <%= submit_tag "Confirm reviewed sale" %><p role="status" data-submission-status></p>
+    <% end %>
+  </section>
+  <section class="archive-section"><h2>Discard draft</h2><p>Remove this draft without changing stock.</p><%= button_to "Discard draft", order_path(@order), method: :delete, params: { revision: @order.revision }, class: "button-secondary" %></section>
+<% elsif @order.confirmed? %>
+  <section class="card form-card"><h2>Void recorded sale</h2><p>Void the entire sale and restore its original quantities. The original sale and movements remain visible. No money is refunded.</p>
+    <%= form_with url: void_order_path(@order), class: "stack", data: { pending: true } do %>
+      <div><%= label_tag :void_reason, "Reason for voiding" %><%= text_area_tag :void_reason, params[:void_reason], required: true, maxlength: 500, rows: 3 %></div>
+      <div class="checkbox-row"><%= check_box_tag :acknowledged, "1", false, required: true %><%= label_tag :acknowledged, "I confirm that this entire recorded sale should be voided." %></div>
+      <%= submit_tag "Void recorded sale", class: "button-secondary" %><p role="status" data-submission-status></p>
+    <% end %>
+  </section>
+<% else %>
+  <section class="card"><h2>Sale voided</h2><p>Voided <%= local_time(@order.voided_at) %> by <%= @order.voided_by.email_address %>.</p><p><strong>Reason:</strong> <%= @order.void_reason %></p><p>Original quantities were restored. This recorded sale cannot be reactivated. No money was refunded.</p></section>
+<% end %>

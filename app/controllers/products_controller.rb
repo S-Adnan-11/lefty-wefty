@@ -18,7 +18,7 @@ class ProductsController < ApplicationController
   end
 
   def show
-    @page, @page_count, @movements = paginate(@product.inventory_logs.includes(:actor).order(id: :desc))
+    @page, @page_count, @movements = paginate(@product.inventory_logs.includes(:actor, :order_item).order(id: :desc))
     @change = StockChange.new(kind: "receipt", operation_key: SecureRandom.uuid)
   end
 
@@ -41,7 +41,8 @@ class ProductsController < ApplicationController
   end
 
   def update
-    if @product.update(product_params)
+    saved = @product.with_lock { @product.update(product_params) }
+    if saved
       redirect_to @product, notice: "Product updated."
     else
       render :edit, status: :unprocessable_entity

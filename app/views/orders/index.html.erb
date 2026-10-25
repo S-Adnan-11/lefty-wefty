@@ -1,0 +1,14 @@
+<% content_for :title, "Sales · Lefty-Wefty" %>
+<div class="page-heading"><div><p class="eyebrow">Recorded sales</p><h1>Sales</h1><p class="muted">Draft, confirm, and follow each sale's stock history.</p></div><%= link_to "New sale", new_order_path, class: "button" %></div>
+<%= form_with url: orders_path, method: :get, class: "filters card" do |form| %>
+  <div><%= form.label :status, "Sale status" %><%= form.select :status, [["All statuses", ""], ["Draft", "draft"], ["Confirmed", "confirmed"], ["Voided", "voided"]], selected: @status %></div><%= form.submit "Filter sales" %>
+<% end %>
+<section class="card">
+  <% if @orders.empty? %><p class="empty">No sales yet for this selection. Create a draft to review products and prices.</p><% else %>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Sales table"><table>
+      <caption class="sr-only">Your business's sales</caption>
+      <thead><tr><th scope="col">Sale</th><th scope="col">Status</th><th scope="col">Total</th><th scope="col">Created</th></tr></thead>
+      <tbody><% @orders.each do |order| %><tr><td><%= link_to "Sale ##{order.id}", order %></td><td><%= order.state.humanize %></td><td class="numeric"><%= money_minor(order.total_minor) %><% if order.draft? %><small>Review quote</small><% end %></td><td><%= local_time(order.created_at) %></td></tr><% end %></tbody>
+    </table></div><%= render "shared/pagination" %>
+  <% end %>
+</section>

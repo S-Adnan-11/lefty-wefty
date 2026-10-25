@@ -11,7 +11,7 @@ class StockMovementsController < ApplicationController
     @product.reload
     @change.errors.add(:base, error.message) if @change.errors.empty?
     @page = @page_count = 1
-    @movements = @product.inventory_logs.includes(:actor).order(id: :desc).limit(20)
+    @movements = @product.inventory_logs.includes(:actor, :order_item).order(id: :desc).limit(20)
     render "products/show", status: :unprocessable_entity
   end
 end
