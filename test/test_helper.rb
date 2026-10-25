@@ -1,5 +1,6 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
+raise "Tests require the dedicated test database" unless Rails.env.test? && ActiveRecord::Base.connection_db_config.database == "lefty_wefty_test"
 require "rails/test_help"
 require_relative "test_helpers/session_test_helper"
 
