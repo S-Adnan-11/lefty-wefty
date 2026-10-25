@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) || "Lefty-Wefty · Inventory" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application" %>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <%= link_to "Lefty-Wefty", root_path, class: "brand" %>
+        <nav aria-label="Main navigation">
+          <% if authenticated? %>
+            <%= link_to "Workspace", root_path %>
+            <%= link_to "Products", products_path %>
+            <%= button_to "Log out", session_path, method: :delete, class: "button-quiet" %>
+          <% else %>
+            <%= link_to "Log in", new_session_path %>
+            <%= link_to "Create account", signup_path %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
+    <main id="main" tabindex="-1" class="container">
+      <% flash.each do |kind, message| %>
+        <div class="flash <%= kind %>" role="<%= kind == "alert" ? "alert" : "status" %>"><%= message %></div>
+      <% end %>
+      <%= yield %>
+    </main>
+    <footer class="container footer">Lefty-Wefty · A clearer view of your stock.</footer>
+  </body>
+</html>

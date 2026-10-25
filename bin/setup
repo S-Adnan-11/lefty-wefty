@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+require "fileutils"
+require "rbconfig"
+
+FileUtils.chdir File.expand_path("..", __dir__) do
+  system("bundle", "check") || system("bundle", "install", exception: true)
+  system(RbConfig.ruby, "bin/rails", "db:migrate", exception: true)
+  system(RbConfig.ruby, "bin/rails", "db:migrate", "RAILS_ENV=test", exception: true)
+  puts "Run ruby bin/rails server to open the local application."
+end

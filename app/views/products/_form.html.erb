@@ -1,0 +1,11 @@
+<%= render "shared/errors", object: @product %>
+<%= form_with model: @product, class: "stack" do |form| %>
+  <div><%= form.label :name, "Product name" %><%= form.text_field :name, required: true, maxlength: 160 %></div>
+  <div><%= form.label :sku, "SKU" %><%= form.text_field :sku, required: true, maxlength: 64, aria: { describedby: "sku-help" } %><small id="sku-help">Letters, numbers, dots, hyphens and underscores. Stored in uppercase; unique within your business.</small></div>
+  <div><%= form.label :price_minor, "Selling price (NGN minor units)" %><%= form.number_field :price_minor, required: true, min: 1, max: Product::MAX_PRICE_MINOR, step: 1, aria: { describedby: "price-help" } %><small id="price-help">Enter whole kobo: 125000 means NGN 1,250.00.</small></div>
+  <div><%= form.label :low_stock_threshold, "Low-stock threshold" %><%= form.number_field :low_stock_threshold, required: true, min: 0, max: Product::MAX_QUANTITY, step: 1 %></div>
+  <% if @product.new_record? %>
+    <div><%= label_tag :opening_quantity, "Opening quantity" %><%= number_field_tag :opening_quantity, @opening_quantity, required: true, min: 0, max: Product::MAX_QUANTITY, step: 1, aria: { describedby: "opening-help" } %><small id="opening-help">Optional opening stock is recorded as a movement. Use zero to start empty.</small></div>
+  <% end %>
+  <div class="actions"><%= form.submit @product.new_record? ? "Create product" : "Save product" %><%= link_to "Cancel", @product.persisted? ? product_path(@product) : products_path %></div>
+<% end %>

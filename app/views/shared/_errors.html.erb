@@ -1,0 +1,6 @@
+<% if object.errors.any? %>
+  <div class="errors" role="alert">
+    <h2>Please check the following</h2>
+    <ul><% object.errors.full_messages.uniq.each do |message| %><li><%= message %></li><% end %></ul>
+  </div>
+<% end %>

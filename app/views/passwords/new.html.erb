@@ -1,0 +1,10 @@
+<% content_for :title, "Reset password · Lefty-Wefty" %>
+<div class="auth-card">
+  <p class="eyebrow">Account recovery</p>
+  <h1>Reset your password</h1>
+  <p class="muted">In local development, reset emails stay on this machine. View the <%= link_to "development mail preview", "/rails/mailers/passwords_mailer/reset" %> to open a reset link. External email delivery is not configured.</p>
+  <%= form_with url: passwords_path, class: "stack" do |form| %>
+    <div><%= form.label :email_address, "Email address" %><%= form.email_field :email_address, required: true, autocomplete: "email" %></div>
+    <%= form.submit "Prepare reset instructions" %>
+  <% end %>
+</div>

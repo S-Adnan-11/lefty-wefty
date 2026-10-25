@@ -1,0 +1,12 @@
+<% content_for :title, "Log in · Lefty-Wefty" %>
+<div class="auth-card">
+  <p class="eyebrow">Welcome back</p>
+  <h1>Log in to your workspace</h1>
+  <%= form_with url: session_path, class: "stack" do |form| %>
+    <div><%= form.label :email_address, "Email address" %><%= form.email_field :email_address, required: true, autocomplete: "username", value: params[:email_address] %></div>
+    <div><%= form.label :password %><%= form.password_field :password, required: true, autocomplete: "current-password" %></div>
+    <%= form.submit "Log in" %>
+  <% end %>
+  <p><%= link_to "Forgot your password?", new_password_path %></p>
+  <p>New here? <%= link_to "Create a workspace", signup_path %></p>
+</div>

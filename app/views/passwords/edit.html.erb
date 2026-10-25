@@ -1,0 +1,10 @@
+<% content_for :title, "Choose a password · Lefty-Wefty" %>
+<div class="auth-card">
+  <h1>Choose a new password</h1>
+  <%= render "shared/errors", object: @user %>
+  <%= form_with url: password_path(params[:token]), method: :put, class: "stack" do |form| %>
+    <div><%= form.label :password, "New password" %><%= form.password_field :password, required: true, minlength: 12, maxlength: 72, autocomplete: "new-password" %></div>
+    <div><%= form.label :password_confirmation, "Confirm new password" %><%= form.password_field :password_confirmation, required: true, autocomplete: "new-password" %></div>
+    <%= form.submit "Reset password" %>
+  <% end %>
+</div>

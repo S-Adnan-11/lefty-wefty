@@ -1,0 +1,29 @@
+<% content_for :title, "#{Current.business.name} · Lefty-Wefty" %>
+<div class="page-heading">
+  <div><p class="eyebrow">Your workspace</p><h1><%= Current.business.name %></h1><p class="muted">Stock at a glance · <%= Current.business.currency %> · <%= Current.business.timezone %></p></div>
+  <%= link_to "Add product", new_product_path, class: "button" %>
+</div>
+<div class="metrics">
+  <div class="card"><span>Active products</span><strong><%= @active_count %></strong></div>
+  <div class="card"><span>Units in active stock</span><strong><%= number_with_delimiter(@total_units) %></strong></div>
+  <div class="card"><span>Low-stock products</span><strong><%= @low_stock_count %></strong></div>
+</div>
+<div class="workspace-grid">
+  <section class="card">
+    <div class="section-heading"><h2>Needs a closer look</h2><%= link_to "All low stock", products_path(status: "low") %></div>
+    <p class="muted">Active products at or below their stock threshold, including zero.</p>
+    <% if @low_stock.empty? %>
+      <p class="empty">No products need restocking. <%= link_to "Browse products", products_path %> or add your first product.</p>
+    <% else %>
+      <ul class="record-list"><% @low_stock.each do |product| %><li><div><%= link_to product.name, product %><small><%= product.sku %></small></div><span class="badge warning"><%= product.quantity %> left</span></li><% end %></ul>
+    <% end %>
+  </section>
+  <section class="card">
+    <h2>Recent stock movements</h2>
+    <% if @recent_movements.empty? %>
+      <p class="empty">Your stock history starts with your first receipt or adjustment.</p>
+    <% else %>
+      <ul class="record-list"><% @recent_movements.each do |movement| %><li><div><%= link_to movement.product.name, movement.product %><small><%= movement.kind.humanize %> · <%= local_time(movement.created_at) %></small></div><strong><%= signed_units(movement.quantity_delta) %></strong></li><% end %></ul>
+    <% end %>
+  </section>
+</div>

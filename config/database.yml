@@ -1,0 +1,23 @@
+<% local_path = Rails.root.join("config/database.local.yml") %>
+<% local = local_path.exist? ? YAML.safe_load_file(local_path) : {} %>
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  host: <%= ENV.fetch("LEFTY_WEFTY_DB_HOST", local.fetch("host", "127.0.0.1")).to_json %>
+  port: <%= ENV.fetch("LEFTY_WEFTY_DB_PORT", local.fetch("port", 5432)) %>
+  username: <%= ENV.fetch("LEFTY_WEFTY_DB_USER", local.fetch("username", "lefty_wefty")).to_json %>
+  password: <%= ENV.fetch("LEFTY_WEFTY_DB_PASSWORD", local.fetch("password", "")).to_json %>
+
+development:
+  <<: *default
+  database: lefty_wefty_development
+
+test:
+  <<: *default
+  database: lefty_wefty_test
+
+production:
+  adapter: postgresql
+  url: <%= ENV["DATABASE_URL"].to_json %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
