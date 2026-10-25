@@ -76,6 +76,18 @@ The application records sales and stock; it does not collect or refund money. Th
 
 Sales lists have status filters and 20-record pagination. Repeated creation, confirmation, and void submissions resolve to their existing result. Reusing a submission identity with different items or a completed void with another reason is rejected. A discarded draft's submission identity is retained, so a browser retry cannot recreate it; start a new sale instead.
 
+## Dashboard and monthly sales
+
+The workspace shows active stock, products at or below their low-stock threshold, recent recorded sales and movements, and the current business month's confirmed sale count and value. Archived products are excluded from current stock indicators. Recent sales show confirmed and voided records with their status; drafts remain in the sales list.
+
+Open **Reports** for monthly confirmed sales, units sold, and sales value. First and last months use `YYYY-MM` and are both included. The default is the last 12 business-local months including the current month. Each request is limited to 36 months as an interface bound, not a measured capacity guarantee. Empty months appear as zero, and the current month is labelled month to date. The table includes exact range totals, business currency/timezone, and generation time.
+
+Only currently confirmed, nonvoided sales contribute, grouped by confirmation time in the business timezone. Later voids remove the original month's contribution, so historical summaries can change. Archived or renamed/repriced products retain their recorded sale values. This is a current-state sales summary; it does not calculate profit, tax, payments, or money collected.
+
+The parameterized raw SQL is in [`Reports::MonthlySales`](app/services/reports/monthly_sales.rb). It filters authorized orders by a half-open UTC timestamp interval, aggregates item quantities to one row per order, sums each order's value once, and joins monthly aggregates to a calendar-month series. Two equal-value orders both count. Rails stores confirmation timestamps as UTC values in PostgreSQL `timestamp without time zone`; explicit conversions keep grouping independent of the database session timezone. For Lagos, 23:30 UTC on a month's final day belongs to the next local month. Money remains integral through SQL aggregation, Ruby, and display.
+
+Products support name/SKU search and active, archived, or low-stock filters. Sales support status and exact sale number filtering (for example, `123` or `#123`). **Movements** filters stock history by product and movement type, including archived products and linked sale reversals. Lists use stable 20-row pagination with filters in GET URLs, clear-filter links, and ordinary server forms that work without JavaScript. Invalid page values return the first page; valid page numbers past the end show the final page.
+
 ## Data integrity
 
 The authenticated owner's business scopes records, writes, search, and workspace totals. Submitted ownership fields are ignored. Composite foreign keys prevent movements from connecting products and actors from different businesses.

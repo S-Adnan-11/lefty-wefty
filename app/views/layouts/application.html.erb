@@ -18,6 +18,8 @@
             <%= link_to "Workspace", root_path %>
             <%= link_to "Products", products_path %>
             <%= link_to "Sales", orders_path %>
+            <%= link_to "Movements", stock_movements_path %>
+            <%= link_to "Reports", report_path %>
             <%= button_to "Log out", session_path, method: :delete, class: "button-quiet" %>
           <% else %>
             <%= link_to "Log in", new_session_path %>

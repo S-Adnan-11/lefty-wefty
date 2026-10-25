@@ -4,6 +4,7 @@
   <div><%= form.label :q, "Search name or SKU" %><%= form.search_field :q, value: @query, maxlength: 160 %></div>
   <div><%= form.label :status, "Show products" %><%= form.select :status, [["Active", "active"], ["Low stock", "low"], ["Archived", "archived"]], selected: @status %></div>
   <%= form.submit "Filter" %>
+  <%= link_to "Clear filters", products_path %>
 <% end %>
 <% if @products.empty? %>
   <div class="card empty"><h2>No products found</h2><p>Try another search or <%= link_to "add a product", new_product_path %>.</p></div>

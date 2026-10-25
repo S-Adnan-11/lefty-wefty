@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   root "workspace#show"
+  resource :report, only: :show
+  resources :stock_movements, only: :index
   get "signup", to: "signups#new"
   post "signup", to: "signups#create"
   resource :session, only: %i[new create destroy]

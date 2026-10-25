@@ -10,6 +10,17 @@
 </div>
 <div class="workspace-grid">
   <section class="card">
+    <div class="section-heading"><h2><%= @month_sales.current_month.strftime("%B %Y") %> · month to date</h2><%= link_to "Monthly report", report_path %></div>
+    <dl class="sales-summary"><dt>Confirmed sales</dt><dd id="month-sale-count"><%= number_with_delimiter(@month_sales.sale_count) %></dd><dt>Sales value</dt><dd id="month-sales-value"><%= money_minor(@month_sales.total_minor) %></dd></dl>
+    <p class="muted">Confirmed, nonvoided sales in <%= Current.business.timezone %>. Values use recorded sale prices.</p>
+  </section>
+  <section class="card">
+    <div class="section-heading"><h2>Recent sales</h2><%= link_to "All sales", orders_path %></div>
+    <% if @recent_sales.empty? %><p class="empty">No recorded sales yet. <%= link_to "Create a draft", new_order_path %> to review products and prices.</p><% else %>
+      <ul class="record-list"><% @recent_sales.each do |order| %><li><div><%= link_to "Sale ##{order.id}", order %><small><%= order.state.humanize %> · confirmed <%= local_time(order.confirmed_at) %></small></div><strong><%= money_minor(order.total_minor) %></strong></li><% end %></ul>
+    <% end %>
+  </section>
+  <section class="card">
     <div class="section-heading"><h2>Needs a closer look</h2><%= link_to "All low stock", products_path(status: "low") %></div>
     <p class="muted">Active products at or below their stock threshold, including zero.</p>
     <% if @low_stock.empty? %>
@@ -19,11 +30,11 @@
     <% end %>
   </section>
   <section class="card">
-    <h2>Recent stock movements</h2>
+    <div class="section-heading"><h2>Recent stock movements</h2><%= link_to "All movements", stock_movements_path %></div>
     <% if @recent_movements.empty? %>
       <p class="empty">Your stock history starts with your first receipt or adjustment.</p>
     <% else %>
-      <ul class="record-list"><% @recent_movements.each do |movement| %><li><div><%= link_to movement.product.name, movement.product %><small><%= movement.kind.humanize %> · <%= local_time(movement.created_at) %></small></div><strong><%= signed_units(movement.quantity_delta) %></strong></li><% end %></ul>
+      <ul class="record-list"><% @recent_movements.each do |movement| %><li><div><%= link_to movement.product.name, movement.product %><small><%= movement.kind.humanize %> · <%= local_time(movement.created_at) %></small><% if movement.order_item %><%= link_to "Sale ##{movement.order_item.order_id}", order_path(movement.order_item.order_id) %><% if movement.reversal_of_id %><small>Reverses movement #<%= movement.reversal_of_id %></small><% end %><% end %></div><strong><%= signed_units(movement.quantity_delta) %></strong></li><% end %></ul>
     <% end %>
   </section>
 </div>

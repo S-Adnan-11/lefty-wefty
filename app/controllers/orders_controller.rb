@@ -1,13 +1,17 @@
 class OrdersController < ApplicationController
+  include Pagination
   before_action :set_order, only: %i[show edit update destroy confirm void]
 
   def index
     @status = %w[draft confirmed voided].include?(params[:status]) ? params[:status] : nil
     scope = Current.business.orders
     scope = scope.where(state: @status) if @status
-    @page_count = [ (scope.count / 20.0).ceil, 1 ].max
-    @page = params[:page].to_s.to_i.clamp(1, @page_count)
-    @orders = scope.order(id: :desc).limit(20).offset((@page - 1) * 20)
+    @reference = params[:reference].to_s.strip.first(40)
+    if @reference.present?
+      id = @reference.delete_prefix("#")
+      scope = /\A[1-9][0-9]{0,18}\z/.match?(id) && id.to_i <= Order::MAX_AMOUNT ? scope.where(id: id.to_i) : scope.none
+    end
+    @page, @page_count, @orders = paginate(scope.order(created_at: :desc, id: :desc))
   end
 
   def new

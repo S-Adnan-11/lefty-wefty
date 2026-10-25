@@ -1,4 +1,5 @@
 class ProductsController < ApplicationController
+  include Pagination
   before_action :set_product, only: %i[show edit update archive]
 
   def index
@@ -64,11 +65,5 @@ class ProductsController < ApplicationController
 
     def product_params
       params.expect(product: [ :name, :sku, :price_minor, :low_stock_threshold ])
-    end
-
-    def paginate(scope)
-      page_count = [ (scope.count / 20.0).ceil, 1 ].max
-      page = params[:page].to_s.to_i.clamp(1, page_count)
-      [ page, page_count, scope.limit(20).offset((page - 1) * 20) ]
     end
 end
