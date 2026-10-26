@@ -29,7 +29,7 @@
             <%= link_to "Create account", signup_path %>
           <% end %>
         </nav>
-        <% if authenticated? %><details class="account-menu" data-menu><summary aria-label="Account menu"><span class="account-mark" aria-hidden="true"><%= Current.user.email_address.first.upcase %></span><span class="account-label">Account</span><span aria-hidden="true">⌄</span></summary><div class="account-panel"><%= link_to "My account", account_path %><%= link_to "Business settings", edit_business_settings_path %><%= button_to "Log out", session_path, method: :delete, class: "button-quiet" %></div></details><% end %>
+        <% if authenticated? %><details class="account-menu" data-menu><summary aria-label="Account menu"><span class="account-mark" aria-hidden="true"><%= Current.user.email_address.first.upcase %></span><span class="account-label">Account</span><span aria-hidden="true"></span></summary><div class="account-panel"><%= link_to "My account", account_path %><%= link_to "Business settings", edit_business_settings_path %><%= button_to "Log out", session_path, method: :delete, class: "button-quiet" %></div></details><% end %>
         </div>
       </div>
     </header>
