@@ -24,13 +24,13 @@
       <%= submit_tag "Record sale" %><p role="status" data-submission-status></p>
     <% end %>
   </section>
-  <section class="archive-section"><h2>Discard draft</h2><p>Remove this draft without changing stock.</p><%= button_to "Discard draft", order_path(@order), method: :delete, params: { revision: @order.revision }, class: "button-secondary" %></section>
+  <section class="archive-section"><h2>Discard draft</h2><p>Remove this draft without changing stock.</p><%= button_to "Discard draft", order_path(@order), method: :delete, params: { revision: @order.revision }, class: "button-danger" %></section>
 <% elsif @order.confirmed? %>
-  <section class="card form-card"><h2>Cancel completed sale</h2><p>Cancelling returns all the items to stock. The original sale and stock history stay visible. No money is refunded by the app.</p>
+  <section class="card form-card"><h2>Cancel completed sale</h2><p>Cancelling this sale returns its items to stock. The original sale and stock history stay visible. No money is refunded by the app.</p>
     <%= form_with url: void_order_path(@order), class: "stack", data: { pending: true } do %>
       <div><%= label_tag :void_reason, "Reason for cancelling" %><%= text_area_tag :void_reason, params[:void_reason], required: true, maxlength: 500, rows: 3 %></div>
       <div class="checkbox-row"><%= check_box_tag :acknowledged, "1", params[:acknowledged] == "1", required: true %><%= label_tag :acknowledged, "Cancel this entire sale and return all items to stock." %></div>
-      <%= submit_tag "Cancel completed sale", class: "button-secondary" %><p role="status" data-submission-status></p>
+      <%= submit_tag "Cancel sale", class: "button-danger" %><p role="status" data-submission-status></p>
     <% end %>
   </section>
 <% else %>

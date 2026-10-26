@@ -32,7 +32,7 @@ class ProductsController < ApplicationController
     @product = Current.business.products.new(product_params)
     @opening_quantity = params[:opening_quantity].presence || "0"
     if Products::Create.call(product: @product, actor: Current.user, opening_quantity: @opening_quantity)
-      redirect_to @product, notice: "Product created."
+      redirect_to @product, notice: "Product added."
     else
       render :new, status: :unprocessable_entity
     end

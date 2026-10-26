@@ -7,6 +7,11 @@
   --green: #245c43;
   --green-hover: #306e50;
   --focus: #367a55;
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --primary-pressed: #1e3a8a;
+  --danger: #b42318;
+  --danger-hover: #912018;
 }
 body { min-width: 280px; }
 h1 { font-size: clamp(1.7rem, 3vw, 2.2rem); }
@@ -82,6 +87,24 @@ th.numeric, td.numeric { text-align: right; }
 .record-list li > div { flex: 1 1 8rem; }
 .record-list li > strong { flex: 0 1 auto; max-width: 100%; margin-left: auto; white-space: nowrap; overflow-wrap: normal; }
 button[hidden], [hidden] { display: none !important; }
+/* Actions share a role; branding and navigation keep their green palette. */
+button, input[type=submit], .button { background: var(--primary); border-color: var(--primary); color: white; }
+button:hover, input[type=submit]:hover, .button:hover { background: var(--primary-hover); }
+button:active, input[type=submit]:active, .button:active { background: var(--primary-pressed); }
+:is(button, input[type=submit], .button):focus-visible { outline-color: var(--primary); }
+:is(button, input[type=submit], .button):disabled { opacity: .65; cursor: wait; }
+:is(button, input[type=submit], .button):is(.button-secondary, .button-quiet, .step-button) { background: white; color: var(--ink); border-color: #b8c9bc; }
+:is(button, input[type=submit], .button):is(.button-secondary, .button-quiet, .step-button):hover { background: #edf2ed; }
+:is(button, input[type=submit], .button):is(.button-secondary, .button-quiet, .step-button):active { background: #dce5dc; }
+:is(button, input[type=submit], .button).button-danger { background: var(--danger); border-color: var(--danger); color: white; }
+:is(button, input[type=submit], .button).button-danger:hover { background: var(--danger-hover); }
+:is(button, input[type=submit], .button).button-danger:active { background: #7a1b14; }
+:is(button, input[type=submit], .button).button-danger:focus-visible { outline-color: var(--danger); }
+.account-panel button.button-danger-text { background: white; color: var(--danger); border-color: transparent; }
+.account-panel button.button-danger-text:hover { background: #fef3f2; }
+.account-panel button.button-danger-text:active { background: #fee4e2; }
+.account-panel button.button-danger-text:focus-visible { outline-color: var(--danger); }
+.destructive-choice { color: var(--danger); }
 @media (max-width: 1180px) {
   .header-inner { flex-wrap: wrap; gap: .4rem; padding-block: .7rem; }
   .header-controls { width: 100%; justify-content: flex-end; }

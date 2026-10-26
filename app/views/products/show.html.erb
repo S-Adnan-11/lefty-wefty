@@ -35,5 +35,5 @@
   <% end %>
 </section>
 <% unless @product.archived? %>
-  <section class="archive-section"><h2>Archive product</h2><p>Remove this product from active lists and low-stock indicators. Stock and history are retained.</p><%= button_to "Archive product", archive_product_path(@product), class: "button-secondary" %></section>
+  <section class="archive-section"><h2>Archive product</h2><p>Remove this product from active lists and low-stock indicators. Stock and history are retained.</p><%= button_to "Archive product", archive_product_path(@product), class: "button-danger" %></section>
 <% end %>
