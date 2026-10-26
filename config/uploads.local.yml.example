@@ -1,0 +1,4 @@
+# Use an absolute path on persistent storage outside the source checkout.
+root: /path/to/persistent/lefty-wefty/uploads
+# Directory containing the ImageMagick 7 magick executable, if absent from PATH.
+image_magick_path: /path/to/imagemagick

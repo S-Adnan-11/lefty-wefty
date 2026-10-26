@@ -3,29 +3,34 @@
   <head>
     <title><%= content_for(:title) || "Lefty-Wefty · Inventory" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%= stylesheet_link_tag "application" %>
+    <%= stylesheet_link_tag "application", "interface" %>
     <%= javascript_include_tag "application", defer: true %>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="header-inner">
-        <%= link_to "Lefty-Wefty", root_path, class: "brand" %>
-        <nav aria-label="Main navigation">
+        <div class="header-identity">
+          <%= link_to root_path, class: "brand" do %><span class="brand-mark" aria-hidden="true">LW</span><span>Lefty-Wefty</span><% end %>
+          <% if authenticated? %><span class="identity-chevron" aria-hidden="true">›</span><div class="business-identity"><span class="logo-frame"><%= business_avatar(Current.business) %></span><span class="business-name" tabindex="0" title="<%= Current.business.name %>"><%= Current.business.name %></span></div><% end %>
+        </div>
+        <div class="header-controls"><nav aria-label="Main navigation">
           <% if authenticated? %>
-            <%= link_to "Workspace", root_path %>
-            <%= link_to "Products", products_path %>
-            <%= link_to "Sales", orders_path %>
-            <%= link_to "Movements", stock_movements_path %>
-            <%= link_to "Reports", report_path %>
-            <%= button_to "Log out", session_path, method: :delete, class: "button-quiet" %>
+            <%= navigation_link "Overview", root_path, active: controller_name == "workspace" %>
+            <%= navigation_link "Products", products_path, active: controller_name == "products" %>
+            <%= navigation_link "Sales", orders_path, active: controller_name == "orders" %>
+            <%= navigation_link "Stock history", stock_movements_path, active: controller_name == "stock_movements" %>
+            <%= navigation_link "Reports", report_path, active: controller_name == "reports" %>
           <% else %>
             <%= link_to "Log in", new_session_path %>
             <%= link_to "Create account", signup_path %>
           <% end %>
         </nav>
+        <% if authenticated? %><details class="account-menu" data-menu><summary aria-label="Account menu"><span class="account-mark" aria-hidden="true"><%= Current.user.email_address.first.upcase %></span><span class="account-label">Account</span><span aria-hidden="true">⌄</span></summary><div class="account-panel"><%= link_to "My account", account_path %><%= link_to "Business settings", edit_business_settings_path %><%= button_to "Log out", session_path, method: :delete, class: "button-quiet" %></div></details><% end %>
+        </div>
       </div>
     </header>
     <main id="main" tabindex="-1" class="container">

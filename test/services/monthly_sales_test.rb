@@ -59,9 +59,9 @@ class MonthlySalesTest < ActiveSupport::TestCase
 
   test "year transition defaults zero months strict ranges and one reference clock" do
     result = Reports::MonthlySales.call(business: @business, actor: @owner, now: Time.utc(2024, 12, 31, 23, 30))
-    assert_equal Date.new(2024, 2, 1), result.first_month
+    assert_equal Date.new(2025, 1, 1), result.first_month
     assert_equal Date.new(2025, 1, 1), result.last_month
-    assert_equal 12, result.rows.size
+    assert_equal 1, result.rows.size
     assert_equal 0, result.sale_count
     recorded_sale(@business, at: Time.utc(2024, 12, 31, 23, 30), lines: { @a => 1 })
     assert_equal 1, report(first_month: "2025-01", last_month: "2025-01").sale_count

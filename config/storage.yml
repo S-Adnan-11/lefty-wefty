@@ -1,0 +1,8 @@
+<% local_path = Rails.root.join("config/uploads.local.yml") %>
+<% local = local_path.exist? ? YAML.safe_load_file(local_path) : {} %>
+local:
+  service: Disk
+  root: <%= ENV.fetch("LEFTY_WEFTY_UPLOAD_ROOT", local.fetch("root", Rails.root.join("storage").to_s)).to_json %>
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/test-uploads").to_s.to_json %>

@@ -1,15 +1,15 @@
-<% content_for :title, "Create your workspace · Lefty-Wefty" %>
+<% content_for :title, "Create your account · Lefty-Wefty" %>
 <div class="auth-card">
   <p class="eyebrow">Make room for clarity</p>
-  <h1>Your stock. Your workspace.</h1>
-  <p class="muted">Create an owner account and a private business workspace. Prices use NGN; dates use Africa/Lagos.</p>
+  <h1>Your stock. Overview.</h1>
+  <p class="muted">Keep your products, stock and sales together. Prices are in naira.</p>
   <%= render "shared/errors", object: @user %>
   <%= form_with model: @user, url: signup_path, class: "stack" do |form| %>
     <div><%= label_tag "business_name", "Business name" %><%= text_field_tag "business[name]", @user.business.name, id: "business_name", required: true, maxlength: 120, autocomplete: "organization" %></div>
     <div><%= form.label :email_address, "Email address" %><%= form.email_field :email_address, required: true, maxlength: 254, autocomplete: "email" %></div>
     <div><%= form.label :password %><%= form.password_field :password, required: true, minlength: 12, maxlength: 72, autocomplete: "new-password", aria: { describedby: "password-help" } %><small id="password-help">Use 12–72 characters. A long, unique passphrase works well.</small></div>
     <div><%= form.label :password_confirmation, "Confirm password" %><%= form.password_field :password_confirmation, required: true, autocomplete: "new-password" %></div>
-    <%= form.submit "Create workspace" %>
+    <%= form.submit "Create account" %>
   <% end %>
   <p>Already have an account? <%= link_to "Log in", new_session_path %></p>
 </div>

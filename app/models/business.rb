@@ -1,4 +1,6 @@
 class Business < ApplicationRecord
+  has_one_attached :logo
+  has_one_attached :logo_display
   belongs_to :owner, class_name: "User"
   has_many :products, dependent: :restrict_with_exception
   has_many :inventory_logs, dependent: :restrict_with_exception

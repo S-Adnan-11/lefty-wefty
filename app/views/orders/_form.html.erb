@@ -1,5 +1,6 @@
 <div class="card form-card">
-  <p>Saving a draft does not reserve or deduct stock. Review the server's prices and total before confirming. Leave unused lines empty; clear both fields to remove a line.</p>
+  <p>Choose products and quantities, then review your sale. Stock changes only when you record the sale.</p>
+  <%= render "shared/help", label: "Sale drafts", text: "A saved draft does not reserve stock. Leave unused lines empty; clear both fields to remove a line. The review shows current prices and the total. If a price changes, you’ll review it again before recording the sale." %>
   <% if @error %><div class="errors" role="alert"><%= @error %></div><% end %>
   <% if @products.empty? %><p>No active products are available. <%= link_to "Add a product", new_product_path %> before saving a sale.</p><% end %>
   <%= form_with url: @order ? order_path(@order) : orders_path, method: @order ? :patch : :post, class: "stack", data: { pending: true } do %>

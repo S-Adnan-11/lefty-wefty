@@ -1,0 +1,5 @@
+<div class="quantity-control" data-quantity>
+  <button type="button" class="step-button" data-step="-1" aria-label="Decrease <%= label.downcase %>" hidden>−</button>
+  <%= number_field_tag name, value, id: id, required: local_assigns.fetch(:required, true), min: min, max: Product::MAX_QUANTITY, step: 1, inputmode: "numeric", aria: { label: label, describedby: local_assigns[:describedby] } %>
+  <button type="button" class="step-button" data-step="1" aria-label="Increase <%= label.downcase %>" hidden>+</button>
+</div>

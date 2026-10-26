@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
   root "workspace#show"
+  resource :account, only: %i[show update]
+  resource :business_settings, only: %i[edit update], controller: "business_settings" do
+    get :logo
+  end
   resource :report, only: :show
   resources :stock_movements, only: :index
   get "signup", to: "signups#new"

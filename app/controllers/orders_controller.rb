@@ -25,7 +25,7 @@ class OrdersController < ApplicationController
     @lines = submitted_lines
     order = Sales::Draft.call(business: Current.business, actor: Current.user,
       lines: @lines, submission_key: @submission_key)
-    redirect_to order, notice: "Saved sale: #{order.state}. Drafts do not reserve stock.", status: :see_other
+    redirect_to order, notice: "Sale saved. Review the items and total.", status: :see_other
   rescue Sales::Rejected, ActiveRecord::RecordInvalid => error
     @error = error.message
     prepare_form
@@ -72,7 +72,7 @@ class OrdersController < ApplicationController
   def confirm
     result = Sales::Confirm.call(business: Current.business, actor: Current.user, order_id: @order.id,
       revision: params[:revision], review_token: params[:review_token])
-    redirect_to result, notice: "Recorded sale is #{result.state}.", status: :see_other
+    redirect_to result, notice: "Sale #{result.voided? ? 'cancelled' : 'completed'}.", status: :see_other
   rescue Sales::Rejected, Stock::Apply::Rejected, ActiveRecord::RecordInvalid => error
     show_error(error)
   rescue ActiveRecord::StatementInvalid
@@ -82,11 +82,11 @@ class OrdersController < ApplicationController
   def void
     Sales::Void.call(business: Current.business, actor: Current.user, order_id: @order.id,
       reason: params[:void_reason], acknowledged: params[:acknowledged])
-    redirect_to @order, notice: "Recorded sale is voided. Stock was restored once. No money was refunded.", status: :see_other
+    redirect_to @order, notice: "Sale cancelled. Items were returned to stock. No money was refunded.", status: :see_other
   rescue Sales::Rejected, Stock::Apply::Rejected, ActiveRecord::RecordInvalid => error
     show_error(error)
   rescue ActiveRecord::StatementInvalid
-    show_error(StandardError.new("The void could not be recorded. No void changes were saved. Review the sale and retry."))
+    show_error(StandardError.new("The cancellation could not be recorded. No changes were saved. Review the sale and retry."))
   end
 
   private

@@ -17,3 +17,6 @@
 !/.env.example
 /coverage/
 /.DS_Store
+# Uploads and machine-specific storage configuration
+/storage/
+/config/uploads.local.yml

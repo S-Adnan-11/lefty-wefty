@@ -28,4 +28,10 @@
 #       enabled: "ON"
 
 en:
-  hello: "Hello world"
+  activerecord:
+    attributes:
+      product:
+        sku: Product code
+        price_minor: Selling price
+        price_naira: Selling price
+        low_stock_threshold: Low-stock reminder

@@ -20,8 +20,8 @@ class ReportingTest < ActionDispatch::IntegrationTest
     sign_in_as(@owner)
     get report_path, params: { business_id: @other.business.id, owner_id: @other.id }
     assert_response :success
-    assert_select "#monthly-sales tfoot td", text: "NGN 50.00"
-    assert_select "#monthly-sales tbody tr", count: 12
+    assert_select "#monthly-sales tfoot td", text: "₦50.00"
+    assert_select "#monthly-sales tbody tr", count: 1
     get stock_movements_path, params: { business_id: @other.business.id }
     assert_response :success
     assert_select "td", text: /FOREIGN-ONLY/, count: 0
@@ -43,7 +43,7 @@ class ReportingTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_select "#month-sale-count", "1"
-    assert_select "#month-sales-value", "NGN 50.00"
+    assert_select "#month-sales-value", "₦50.00"
     assert_select ".metrics strong", text: "23"
     assert_select ".metrics strong", text: "22"
     assert_select "a", text: "Sale ##{@sale.id}"
@@ -51,9 +51,9 @@ class ReportingTest < ActionDispatch::IntegrationTest
     void_sale(@sale, at: Time.current + 1.second)
     get root_path
     assert_select "#month-sale-count", "0"
-    assert_select "#month-sales-value", "NGN 0.00"
+    assert_select "#month-sales-value", "₦0.00"
     get report_path
-    assert_select "tfoot td", text: "NGN 0.00"
+    assert_select "tfoot td", text: "₦0.00"
   end
 
   test "filter pagination uses stable ordering keeps GET state and handles invalid pages and sorts" do
@@ -107,7 +107,7 @@ class ReportingTest < ActionDispatch::IntegrationTest
     sign_in_as(@owner)
     get report_path, params: { first_month: "2024-02", last_month: "2024-02" }
     assert_response :success
-    assert_select "tfoot td", text: "NGN 180,143,999,999,819,856.00"
+    assert_select "tfoot td", text: "₦180,143,999,999,819,856.00"
     assert_select "tfoot td", text: "18,014,400"
   end
 end

@@ -2,13 +2,14 @@
 
 An owner-operated inventory and sales application built with Ruby on Rails, PostgreSQL, and server-rendered ERB.
 
-Create a business workspace, manage products, receive stock, confirm sales, and void recorded sales with an auditable movement history. Each account owns one isolated business. Quantities are whole units; prices are integer minor units. Workspaces currently use NGN and Africa/Lagos.
+Manage products, receive stock, record sales, and cancel completed sales with an auditable stock history. Each account owns one isolated business. Enter prices in naira; storage and calculations use integer minor units. Quantities are whole units. Businesses use NGN and Africa/Lagos.
 
 ## Requirements
 
 - Ruby **3.4.12**, Bundler **2.6.9**, and a native extension compiler (RubyInstaller with Devkit on Windows).
 - PostgreSQL **18.6**, including `psql` and `pg_dump` on PATH.
 - Rails **8.1.4** and all other gems are pinned in `Gemfile.lock`.
+- ImageMagick **7**, with PNG, JPEG and WebP support, for logo validation and processing. The local Windows configuration uses **7.1.2-34**.
 
 ## Local setup
 
@@ -47,6 +48,14 @@ Remove-Item Env:RAILS_ENV
 
 Use **Create account** to create an owner and business together. Passwords require at least 12 characters and cannot exceed bcrypt's 72-byte limit. No external service is required.
 
+### Logo storage
+
+Copy `config/uploads.local.yml.example` to the ignored `config/uploads.local.yml`. Set `root` to an absolute directory outside the checkout on durable storage, and `image_magick_path` to the directory containing `magick` if it is absent from PATH. Alternatively, use `LEFTY_WEFTY_UPLOAD_ROOT` and `LEFTY_WEFTY_IMAGE_MAGICK_PATH`. Without configuration, development uses the ignored `storage` directory; tests always use `tmp/test-uploads`.
+
+Back up the upload directory, database (including Active Storage metadata), local configuration, and Rails credentials/key together. Original logo files and sanitized display images are both needed. Restoring the database alone does not restore files. Keep ImageMagick and the repository's `config/image_policy/policy.xml` available after restoration.
+
+Production requires an explicitly configured persistent upload root or a named service using `LEFTY_WEFTY_STORAGE_SERVICE` and a corresponding Rails storage configuration. A provider and its persistence must be verified before accepting live uploads; no hosted storage provider is included. An ephemeral web-service filesystem is unsuitable for durable logos.
+
 ### Fictional sample data and local recovery
 
 `ruby bin/rails db:seed` adds two fictional businesses with different stock and a shared SKU. Repeating it preserves existing products, balances, account passwords, and history. Sample accounts have random passwords with no shared credential.
@@ -55,22 +64,24 @@ In development, open [mail previews](http://localhost:3000/rails/mailers/passwor
 
 ## Using stock
 
-1. Create a product with a name, SKU, price in minor units, and low-stock threshold. For NGN, 125000 kobo displays as NGN 1,250.00.
-2. Start at zero, or supply an opening quantity to record an opening movement.
+1. Create a product with a name, optional product code, selling price in naira, and low-stock reminder. Enter `1250`, `1250.5`, or `1,250.50`; `1,250.50` stores exactly 125050 minor units. Invalid grouping, signs, exponents, overprecision and amounts outside ₦0.01–₦9,999,999,999.99 are rejected without rounding.
+2. Start at zero, or supply starting stock to record the first stock-history entry.
 3. Open the product and choose **Receive stock** with a positive whole quantity.
-4. Choose **Adjustment** with a nonzero signed quantity and a reason to correct a count. Negative balances are rejected.
+4. Choose **Correct stock**, select **Add to stock** or **Remove from stock**, and enter a positive quantity and a reason. Negative balances are rejected.
 5. Check the movement history and workspace indicators. An active product is low stock at or below its threshold, including zero.
 6. Archive a product to remove it from active lists. Its balance and history remain available; new stock changes are disabled.
 
-SKUs are trimmed and uppercased, accept letters, numbers, dots, underscores and hyphens, and are unique per business. Stock and thresholds are limited to 2,147,483,647 units; prices to 999,999,999,999 minor units. Product search, status filtering, and movement history use pages of 20 records.
+Product codes (also called SKUs) are trimmed and uppercased, accept letters, numbers, dots, underscores and hyphens, and are unique per business. A blank new-product code generates a stable `LW-` code with bounded collision retries; a blank edit keeps the current code. Stock and reminder quantities are limited to 2,147,483,647 units; prices to 999,999,999,999 minor units. Product search, status filtering, and stock history use pages of 20 records.
+
+The account menu contains **My account**, **Business settings**, and **Log out**. My account shows the login email and changes passwords using the current password and matching confirmation. A successful change replaces the current session and revokes other sessions; email editing is unavailable. Business settings changes the business name and uploads, replaces or removes a logo. PNG, JPEG and WebP still images up to 2 MB, 4096 pixels per side and 8 million pixels total are supported. Content checks and restricted decoding validate images; display copies are stripped of metadata and fit within 512×512 pixels. Failed validation keeps the saved name and logo. Both uploading and viewing logos require the authenticated owner; default Active Storage public/signed-blob routes are disabled.
 
 ## Using sales
 
 1. Open **Sales → New sale**, select active products, and enter positive whole quantities. Leave unused lines empty. Each product can appear once, with up to 100 lines per sale; **Add product line** adds more fields.
 2. **Save draft for review** shows the server's product prices and total. Drafts do not reserve or deduct stock. You can edit or discard them.
-3. **Confirm reviewed sale** rechecks active products, current prices, and stock. A changed price or edited draft requires renewed review. If any line lacks stock, the entire sale stays a draft and no stock changes. Edit it or receive stock, then retry.
-4. A confirmed sale records its original product names, SKUs, prices, quantities, total, confirmation time, and owner. Later product edits and archiving preserve those snapshots. Follow **Product movements** to the stock ledger; sale movements link back to their sale.
-5. To correct a recorded sale, enter a reason, tick the explicit confirmation, and choose **Void recorded sale**. This voids the entire sale and restores exactly its original quantities, even for archived products. Deductions, snapshots, and linked reversals remain visible. A voided sale cannot be reactivated.
+3. **Record sale** rechecks active products, current prices, and stock. A changed price or edited draft requires renewed review. If any line lacks stock, the entire sale stays a draft and no stock changes. Edit it or receive stock, then retry.
+4. A completed sale records its original product names, SKUs, prices, quantities, total, confirmation time, and owner. Later product edits and archiving preserve those snapshots. Follow **Product stock history**; sale movements link back to their sale.
+5. To correct a recorded sale, enter a reason, tick the explicit confirmation, and choose **Cancel completed sale**. This cancels the entire sale and restores exactly its original quantities, even for archived products. Deductions, snapshots, and linked reversals remain visible. A cancelled sale cannot be reactivated.
 
 The application records sales and stock; it does not collect or refund money. There are no partial voids, discounts, tax calculations, manual sale price overrides, or backdated sales. Line totals and sale totals use integer minor units and must fit a signed 64-bit integer (maximum 9,223,372,036,854,775,807). A reversal that would exceed the stock quantity limit is rejected atomically; correct the physical stock count before retrying.
 
@@ -78,15 +89,15 @@ Sales lists have status filters and 20-record pagination. Repeated creation, con
 
 ## Dashboard and monthly sales
 
-The workspace shows active stock, products at or below their low-stock threshold, recent recorded sales and movements, and the current business month's confirmed sale count and value. Archived products are excluded from current stock indicators. Recent sales show confirmed and voided records with their status; drafts remain in the sales list.
+The overview shows active stock, products at or below their low-stock threshold, recent recorded sales and movements, and the current business month's completed sale count and value. Archived products are excluded from current stock indicators. Recent sales show completed and cancelled records with their status; drafts remain in the sales list.
 
-Open **Reports** for monthly confirmed sales, units sold, and sales value. First and last months use `YYYY-MM` and are both included. The default is the last 12 business-local months including the current month. Each request is limited to 36 months as an interface bound, not a measured capacity guarantee. Empty months appear as zero, and the current month is labelled month to date. The table includes exact range totals, business currency/timezone, and generation time.
+Open **Reports** for monthly completed sales, units sold, and sales value. First and last months use `YYYY-MM` and are both included. The default is the current business-local month. Use This month, Last 3 months, Last 12 months, or the custom first/last month controls. Each request allows up to 36 months. Empty months appear as zero, and the current month is labelled month to date. The table includes exact range totals, business currency/timezone, and generation time.
 
 Only currently confirmed, nonvoided sales contribute, grouped by confirmation time in the business timezone. Later voids remove the original month's contribution, so historical summaries can change. Archived or renamed/repriced products retain their recorded sale values. This is a current-state sales summary; it does not calculate profit, tax, payments, or money collected.
 
 The parameterized raw SQL is in [`Reports::MonthlySales`](app/services/reports/monthly_sales.rb). It filters authorized orders by a half-open UTC timestamp interval, aggregates item quantities to one row per order, sums each order's value once, and joins monthly aggregates to a calendar-month series. Two equal-value orders both count. Rails stores confirmation timestamps as UTC values in PostgreSQL `timestamp without time zone`; explicit conversions keep grouping independent of the database session timezone. For Lagos, 23:30 UTC on a month's final day belongs to the next local month. Money remains integral through SQL aggregation, Ruby, and display.
 
-Products support name/SKU search and active, archived, or low-stock filters. Sales support status and exact sale number filtering (for example, `123` or `#123`). **Movements** filters stock history by product and movement type, including archived products and linked sale reversals. Lists use stable 20-row pagination with filters in GET URLs, clear-filter links, and ordinary server forms that work without JavaScript. Invalid page values return the first page; valid page numbers past the end show the final page.
+Products support name/SKU search and active, archived, or low-stock filters. Sales support status and exact sale number filtering (for example, `123` or `#123`). **Stock history** filters stock history by product and movement type, including archived products and linked sale reversals. Lists use stable 20-row pagination with filters in GET URLs, clear-filter links, and ordinary server forms that work without JavaScript. Invalid page values return the first page; valid page numbers past the end show the final page.
 
 ## Data integrity
 
@@ -123,4 +134,4 @@ Tests require real PostgreSQL and exclusively use `lefty_wefty_test`. The concur
 
 If PostgreSQL cannot connect, check the server process, host, port, local configuration, and project role permissions. If `pg_dump` is missing, add the PostgreSQL bin directory to PATH before migrating or dumping the SQL schema. On Windows, complete RubyInstaller's `ridk install 1` step if the Devkit reports an uninitialized signing keyring.
 
-The application currently provides accounts, products, inventory movements, sales, and whole-sale voids. It does not collect payments, send external email, or provide production hosting.
+The application provides accounts, business profiles/logos, products, stock history, sales, cancellations and monthly reports. It does not collect payments, send external email, or provide production hosting.

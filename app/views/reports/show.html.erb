@@ -1,23 +1,24 @@
 <% content_for :title, "Monthly sales report · Lefty-Wefty" %>
 <div class="page-heading"><div><p class="eyebrow">Sales summary</p><h1>Monthly sales report</h1><p class="muted"><%= Current.business.currency %> · <%= Current.business.timezone %></p></div></div>
 <% if @error %><div class="errors" role="alert"><h2>Check the report range</h2><p><%= @error %></p></div><% end %>
+<nav class="report-presets" aria-label="Report range"><% @presets.each do |label, first| %><%= link_to label, report_path(first_month: first.strftime("%Y-%m"), last_month: @presets.first.last.strftime("%Y-%m")), class: "button button-secondary" %><% end %><a href="#custom-range" class="button button-secondary">Custom range</a></nav>
 <%= form_with url: report_path, method: :get, class: "filters card" do |form| %>
   <div><%= form.label :first_month, "First month" %><%= form.month_field :first_month, value: @first_month, required: true, aria: { describedby: "report-range-help" } %></div>
   <div><%= form.label :last_month, "Last month" %><%= form.month_field :last_month, value: @last_month, required: true %></div>
-  <%= form.submit "Show report" %><%= link_to "Last 12 months", report_path %>
+  <%= form.submit "Show report", id: "custom-range" %>
 <% end %>
-<p id="report-range-help" class="muted">Both months are included. Choose up to 36 months per report; this is an interface limit.</p>
+<p id="report-range-help" class="muted">Both months are included. Choose 36 months or fewer.</p>
 <% if @report %>
   <section class="card">
     <h2><%= @report.first_month.strftime("%B %Y") %> to <%= @report.last_month.strftime("%B %Y") %></h2>
-    <p class="muted">Generated <%= local_time(@report.generated_at) %> (<%= Current.business.timezone %>). Current-state totals can change: a later void removes a sale from its original confirmation month.</p>
-    <% if @report.sale_count.zero? %><p class="empty">No confirmed sales in this range. Empty months are shown as zero. <%= link_to "Browse sales", orders_path %>.</p><% end %>
+    <div class="field-heading"><p class="muted">Updated <%= local_time(@report.generated_at) %></p><%= render "shared/help", label: "Report totals", text: "Completed sales are grouped by the month they were recorded, using your business’s local time. Cancelled sales and drafts are excluded. Cancelling an older sale updates its original month’s total. These are sales values, not profit or money collected." %></div>
+    <% if @report.sale_count.zero? %><p class="empty">No completed sales in this range. Empty months are shown as zero. <%= link_to "Browse sales", orders_path %>.</p><% end %>
     <div class="table-scroll" tabindex="0" role="region" aria-label="Monthly sales report table"><table id="monthly-sales">
-      <caption>Confirmed, nonvoided sales by business-local confirmation month</caption>
-      <thead><tr><th scope="col">Month</th><th scope="col">Confirmed sales</th><th scope="col">Units sold</th><th scope="col">Sales value (<%= Current.business.currency %>)</th></tr></thead>
+      <caption>Completed sales by month</caption>
+      <thead><tr><th scope="col">Month</th><th scope="col">Completed sales</th><th scope="col">Units sold</th><th scope="col">Sales value (<%= Current.business.currency %>)</th></tr></thead>
       <tbody><% @report.rows.each do |row| %><tr><th scope="row"><%= row.month.strftime("%B %Y") %><% if row.month == @report.current_month %><small>Month to date</small><% end %></th><td class="numeric"><%= number_with_delimiter(row.sale_count) %></td><td class="numeric"><%= number_with_delimiter(row.units) %></td><td class="numeric"><%= money_minor(row.total_minor) %></td></tr><% end %></tbody>
       <tfoot><tr><th scope="row">Range total</th><td class="numeric"><%= number_with_delimiter(@report.sale_count) %></td><td class="numeric"><%= number_with_delimiter(@report.units) %></td><td class="numeric"><%= money_minor(@report.total_minor) %></td></tr></tfoot>
     </table></div>
-    <p class="muted report-note">Uses recorded sale values, including archived products. Drafts and voided sales are excluded. Sales value does not represent profit or money collected.</p>
+    <p class="muted report-note">Uses the prices recorded with each sale, including archived products.</p>
   </section>
 <% end %>

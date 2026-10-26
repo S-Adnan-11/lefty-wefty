@@ -25,7 +25,7 @@ module Sales
         order.update!(state: "confirmed", confirmed_at: Time.current, confirmed_by: actor)
         order
       end
-      raise ReviewChanged, "Prices or product details changed. Review the revised total and explicitly confirm again." if revised
+      raise ReviewChanged, "Prices or product details changed. Review the revised total, then record the sale again." if revised
       order
     end
   end

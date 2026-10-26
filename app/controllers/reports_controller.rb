@@ -1,5 +1,7 @@
 class ReportsController < ApplicationController
   def show
+    current = Time.current.in_time_zone(Current.business.timezone).to_date.beginning_of_month
+    @presets = [ [ "This month", current ], [ "Last 3 months", current << 2 ], [ "Last 12 months", current << 11 ] ]
     @first_month = params[:first_month]
     @last_month = params[:last_month]
     @report = Reports::MonthlySales.call(business: Current.business, actor: Current.user,

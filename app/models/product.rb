@@ -7,6 +7,8 @@ class Product < ApplicationRecord
   has_many :order_items, dependent: :restrict_with_exception
   has_many :orders, through: :order_items
   attr_readonly :business_id, :quantity
+  before_validation :generate_code, on: :create
+  validate :valid_naira
 
   normalizes :name, with: ->(value) { value.strip }
   normalizes :sku, with: ->(value) { value.strip.upcase }
@@ -29,7 +31,27 @@ class Product < ApplicationRecord
     !archived? && quantity <= low_stock_threshold
   end
 
+  def price_naira
+    defined?(@price_naira) ? @price_naira : Naira.format(price_minor)
+  end
+
+  def price_naira=(value)
+    @price_naira = value
+    @naira_error = nil
+    self.price_minor = Naira.parse(value)
+  rescue Naira::Invalid => error
+    @naira_error = error.message
+  end
+
+  def generate_code
+    self.sku = "LW-#{SecureRandom.hex(4).upcase}" if sku.blank?
+  end
+
   private
+    def valid_naira
+      errors.add(:price_naira, @naira_error) if @naira_error
+    end
+
     def starts_at_zero
       errors.add(:quantity, "must start at zero; use an opening stock movement") unless quantity == 0
     end

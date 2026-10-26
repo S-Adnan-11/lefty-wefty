@@ -1,5 +1,6 @@
 <fieldset class="sale-line">
   <legend>Product line <%= index.to_s == "__INDEX__" ? "__NUMBER__" : index + 1 %></legend>
-  <div><%= label_tag "line_#{index}_product", "Product", class: "sr-only" %><%= select_tag "order[lines][][product_id]", options_from_collection_for_select(@products, :id, :name, line[:product_id]), include_blank: "Choose product", id: "line_#{index}_product", aria: { label: "Product for line #{index.to_s == '__INDEX__' ? '__NUMBER__' : index + 1}" } %></div>
-  <div><%= label_tag "line_#{index}_quantity", "Quantity" %><%= number_field_tag "order[lines][][quantity]", line[:quantity], min: 1, max: Product::MAX_QUANTITY, step: 1, id: "line_#{index}_quantity" %></div>
+  <div><%= label_tag "line_#{index}_product", "Product" %><%= select_tag "order[lines][][product_id]", options_for_select(@products.map { |product| ["#{product.name} · #{product.sku} · #{money_minor(product.price_minor)}", product.id, { "data-price-minor" => product.price_minor }] }, line[:product_id]), include_blank: "Choose product", id: "line_#{index}_product", aria: { label: "Product for line #{index.to_s == '__INDEX__' ? '__NUMBER__' : index + 1}" } %></div>
+  <div><%= label_tag "line_#{index}_quantity", "Quantity" %><%= render "shared/quantity", name: "order[lines][][quantity]", id: "line_#{index}_quantity", value: line[:quantity], min: 1, label: "Quantity for line #{index.to_s == '__INDEX__' ? '__NUMBER__' : index + 1}", required: false %></div>
+  <p class="line-preview" data-line-preview hidden>Line total: <output data-line-total>—</output></p>
 </fieldset>

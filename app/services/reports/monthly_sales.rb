@@ -42,11 +42,11 @@ module Reports
     def self.call(business:, actor:, first_month: nil, last_month: nil, now: Time.current)
       Sales::Draft.authorize!(business, actor)
       current = now.in_time_zone(business.timezone).to_date.beginning_of_month
-      first = parse_month(first_month, current << 11)
+      first = parse_month(first_month, current)
       last = parse_month(last_month, current)
       span = (last.year - first.year) * 12 + last.month - first.month + 1
       raise InvalidRange, "First month must be on or before last month." if span < 1
-      raise InvalidRange, "Choose at most #{MAX_MONTHS} months at a time." if span > MAX_MONTHS
+      raise InvalidRange, "Choose #{MAX_MONTHS} months or fewer." if span > MAX_MONTHS
 
       binds = [
         ActiveRecord::Relation::QueryAttribute.new("business_id", business.id, ActiveRecord::Type::Integer.new(limit: 8)),

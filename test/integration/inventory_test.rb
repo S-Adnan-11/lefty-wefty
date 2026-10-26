@@ -39,7 +39,7 @@ class InventoryTest < ActionDispatch::IntegrationTest
     assert_select "a", text: @foreign.name, count: 0
     get product_path(@product)
     assert_select "#movement-history", count: 0
-    assert_select "p", /No movements yet/
+    assert_select "p", /No stock changes yet/
   end
 
   test "foreign record IDs cannot show edit update archive or receive nested movements" do
@@ -133,12 +133,12 @@ class InventoryTest < ActionDispatch::IntegrationTest
   test "invalid numeric input and nonexistent balance mutation routes cannot change stock" do
     sign_in_as(@owner)
     assert_no_difference "Product.count" do
-      post products_path, params: { product: product_attributes.merge(price_minor: "1.1") }
+      post products_path, params: { product: product_attributes.merge(price_naira: "1.001") }
       assert_response :unprocessable_entity
     end
     patch product_path(@product), params: { product: { low_stock_threshold: Product::MAX_QUANTITY + 1 } }
     assert_response :unprocessable_entity
-    patch product_path(@product), params: { product: { price_minor: Product::MAX_PRICE_MINOR + 1 } }
+    patch product_path(@product), params: { product: { price_naira: "10000000000.00" } }
     assert_response :unprocessable_entity
     patch "/products/#{@product.id}/quantity", params: { quantity: 50 }
     assert_response :not_found
@@ -149,7 +149,7 @@ class InventoryTest < ActionDispatch::IntegrationTest
 
   private
     def product_attributes
-      { name: "New product", sku: "NEW", price_minor: 500, low_stock_threshold: 0 }
+      { name: "New product", sku: "NEW", price_naira: "5.00", low_stock_threshold: 0 }
     end
 
     def movement_params(quantity: 10, kind: "receipt", reason: nil)

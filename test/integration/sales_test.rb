@@ -63,7 +63,7 @@ class SalesRequestsTest < ActionDispatch::IntegrationTest
     assert_equal 10, @product.reload.quantity
     get order_path(created)
     assert_select "h2", "Review draft"
-    assert_select "#sale-total", "NGN 3,750.00"
+    assert_select "#sale-total", "₦3,750.00"
     assert_select "input[name=revision][value=?]", created.revision.to_s
     2.times do
       post confirm_order_path(created), params: { revision: created.revision, review_token: created.review_token,
@@ -76,7 +76,7 @@ class SalesRequestsTest < ActionDispatch::IntegrationTest
     assert_equal 7, @product.reload.quantity
     get order_path(created)
     assert_select "h2", "Recorded sale"
-    assert_select "a", text: "Product movements"
+    assert_select "a", text: "Product stock history"
     get product_path(@product)
     assert_select "a[href=?]", order_path(created), text: "Sale ##{created.id}"
     2.times do
@@ -86,7 +86,7 @@ class SalesRequestsTest < ActionDispatch::IntegrationTest
     assert_equal 10, @product.reload.quantity
     assert_equal @owner.id, created.reload.voided_by_id
     get order_path(created)
-    assert_select "h2", "Sale voided"
+    assert_select "h2", "Sale cancelled"
     assert_select "form[action=?]", void_order_path(created), count: 0
     post void_order_path(created), params: { void_reason: "Changed reason", acknowledged: "1" }
     assert_response :unprocessable_entity
@@ -94,7 +94,7 @@ class SalesRequestsTest < ActionDispatch::IntegrationTest
     assert_equal "Wrong entry", created.reload.void_reason
     post confirm_order_path(created), params: { revision: -1, review_token: "old" }
     follow_redirect!
-    assert_select "[role=status]", /voided/
+    assert_select "[role=status]", /cancelled/
   end
 
   test "stale quote and stale edit recover with the saved server review" do
@@ -105,7 +105,7 @@ class SalesRequestsTest < ActionDispatch::IntegrationTest
     post confirm_order_path(@order), params: { revision: original_revision, review_token: original_token, total_minor: 1 }
     assert_response :unprocessable_entity
     assert_select "[role=alert]", /Prices or product details changed/
-    assert_select "#sale-total", "NGN 4,200.00"
+    assert_select "#sale-total", "₦4,200.00"
     assert_equal 10, @product.reload.quantity
     assert @order.reload.draft?
     patch order_path(@order), params: payload(revision: original_revision)
@@ -131,7 +131,7 @@ class SalesRequestsTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "Edit draft"
     post void_order_path(@order), params: { void_reason: "Wrong", acknowledged: "1" }
     assert_response :unprocessable_entity
-    assert_select "[role=alert]", /Only a confirmed sale/
+    assert_select "[role=alert]", /Only a completed sale/
     patch order_path(@order), params: payload(lines: [ { product_id: @product.id, quantity: 3 } ])
     @order.reload
     post confirm_order_path(@order), params: { revision: @order.revision, review_token: @order.review_token }

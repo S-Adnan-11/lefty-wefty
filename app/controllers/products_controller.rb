@@ -64,6 +64,8 @@ class ProductsController < ApplicationController
     end
 
     def product_params
-      params.expect(product: [ :name, :sku, :price_minor, :low_stock_threshold ])
+      attributes = params.expect(product: [ :name, :sku, :price_naira, :low_stock_threshold ])
+      attributes.delete(:sku) if @product&.persisted? && attributes[:sku].blank?
+      attributes
     end
 end

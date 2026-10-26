@@ -1,7 +1,7 @@
 <% content_for :title, "Products · Lefty-Wefty" %>
-<div class="page-heading"><div><p class="eyebrow">Catalogue</p><h1>Products</h1><p class="muted">A place for every SKU and every unit.</p></div><%= link_to "Add product", new_product_path, class: "button" %></div>
+<div class="page-heading"><div><p class="eyebrow">Catalogue</p><h1>Products</h1><p class="muted">Your products, prices and stock in one place.</p></div><%= link_to "Add product", new_product_path, class: "button" %></div>
 <%= form_with url: products_path, method: :get, class: "filters card" do |form| %>
-  <div><%= form.label :q, "Search name or SKU" %><%= form.search_field :q, value: @query, maxlength: 160 %></div>
+  <div><%= form.label :q, "Search name or product code" %><%= form.search_field :q, value: @query, maxlength: 160 %></div>
   <div><%= form.label :status, "Show products" %><%= form.select :status, [["Active", "active"], ["Low stock", "low"], ["Archived", "archived"]], selected: @status %></div>
   <%= form.submit "Filter" %>
   <%= link_to "Clear filters", products_path %>
@@ -11,7 +11,7 @@
 <% else %>
   <div class="table-scroll card" tabindex="0" role="region" aria-label="Product table"><table>
     <caption class="sr-only">Products in your business</caption>
-    <thead><tr><th scope="col">Product</th><th scope="col">SKU</th><th scope="col">Unit price</th><th scope="col">Quantity</th><th scope="col">Status</th></tr></thead>
+    <thead><tr><th scope="col">Product</th><th scope="col">Product code</th><th scope="col">Unit price</th><th scope="col">Quantity</th><th scope="col">Status</th></tr></thead>
     <tbody><% @products.each do |product| %><tr>
       <td><%= link_to product.name, product %></td><td><%= product.sku %></td><td class="numeric"><%= money_minor(product.price_minor) %></td><td class="numeric"><%= number_with_delimiter(product.quantity) %></td><td><%= stock_badge(product) %></td>
     </tr><% end %></tbody>

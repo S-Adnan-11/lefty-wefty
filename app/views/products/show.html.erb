@@ -4,31 +4,32 @@
 <div class="metrics">
   <div class="card"><span>Current quantity</span><strong id="quantity"><%= number_with_delimiter(@product.quantity) %></strong></div>
   <div class="card"><span>Selling price</span><strong class="price"><%= money_minor(@product.price_minor) %></strong></div>
-  <div class="card"><span>Low-stock threshold</span><strong><%= @product.low_stock_threshold %></strong></div>
+  <div class="card"><span>Low-stock reminder</span><strong><%= @product.low_stock_threshold %></strong></div>
 </div>
 <% if @product.archived? %>
   <div class="card"><h2>Archived product</h2><p>Quantity and movement history are preserved. New stock changes are disabled.</p></div>
 <% else %>
   <section class="card form-card stock-form">
     <h2>Record a stock change</h2>
-    <p class="muted">Receipts add units. Adjustments add or remove units and require a reason.</p>
+    <p class="muted">Receive new stock or correct a count. Corrections need a reason.</p>
     <%= render "shared/errors", object: @change %>
     <%= form_with model: @change, url: product_stock_movements_path(@product), class: "stack" do |form| %>
       <%= form.hidden_field :operation_key %>
-      <div><%= form.label :kind, "Movement type" %><%= form.select :kind, [["Receive stock", "receipt"], ["Adjustment", "adjustment"]] %></div>
-      <div><%= form.label :quantity, "Quantity change" %><%= form.number_field :quantity, required: true, step: 1, min: -Product::MAX_QUANTITY, max: Product::MAX_QUANTITY, aria: { describedby: "quantity-help" } %><small id="quantity-help">A receipt must be positive. Use a negative adjustment to remove units. Stock cannot fall below zero.</small></div>
-      <div><%= form.label :reason, "Reason (required for adjustments)" %><%= form.text_area :reason, maxlength: 500, rows: 2 %></div>
+      <div><%= form.label :kind, "Stock change" %><%= form.select :kind, [["Receive stock", "receipt"], ["Correct stock", "adjustment"]] %></div>
+      <div><%= label_tag "stock_change_direction", "Correction direction" %><%= select_tag "stock_change[direction]", options_for_select([["Add to stock", "add"], ["Remove from stock", "remove"]], @direction || "add"), id: "stock_change_direction", aria: { describedby: "direction-help" } %><small id="direction-help">Applies to corrections. Receiving stock always adds units.</small></div>
+      <div><%= form.label :quantity, "Quantity" %><%= render "shared/quantity", name: "stock_change[quantity]", id: "stock_change_quantity", value: @quantity_input || @change.quantity, min: 1, label: "Quantity", describedby: "quantity-help stock_change-errors" %><small id="quantity-help">Enter the number of units. Stock cannot fall below zero.</small></div>
+      <div><%= form.label :reason, "Reason (required for corrections)" %><%= form.text_area :reason, maxlength: 500, rows: 2 %></div>
       <%= form.submit "Record stock change" %>
     <% end %>
   </section>
 <% end %>
 <section class="card">
-  <h2>Movement history</h2><p class="muted">Each successful change is permanent. Correct a mistake with a new adjustment. Times are shown in <%= Current.business.timezone %>.</p>
-  <% if @movements.empty? %><p class="empty">No movements yet. Receive stock to start the history.</p><% else %>
-    <div class="table-scroll" tabindex="0" role="region" aria-label="Movement history table"><table id="movement-history">
-      <caption class="sr-only">Stock movements for <%= @product.name %></caption>
+  <h2>Stock history</h2><p class="muted">Each successful change is permanent. Correct a mistake with a new stock correction. Times are shown in <%= Current.business.timezone %>.</p>
+  <% if @movements.empty? %><p class="empty">No stock changes yet. Receive stock to start the history.</p><% else %>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Stock history table"><table id="movement-history">
+      <caption class="sr-only">Stock history for <%= @product.name %></caption>
       <thead><tr><th scope="col">When</th><th scope="col">Type / reason</th><th scope="col">Change</th><th scope="col">Balance</th><th scope="col">Recorded by</th></tr></thead>
-      <tbody><% @movements.each do |movement| %><tr><td><%= local_time(movement.created_at) %></td><td><%= movement.kind.humanize %><small><%= movement.reason %></small><% if movement.order_item %><%= link_to "Sale ##{movement.order_item.order_id}", order_path(movement.order_item.order_id) %><small>Movement #<%= movement.id %><% if movement.reversal_of_id %> reverses #<%= movement.reversal_of_id %><% end %></small><% end %></td><td class="numeric"><%= signed_units(movement.quantity_delta) %></td><td class="numeric"><%= movement.resulting_balance %></td><td><%= movement.actor.email_address %></td></tr><% end %></tbody>
+      <tbody><% @movements.each do |movement| %><tr><td><%= local_time(movement.created_at) %></td><td><%= movement_label(movement.kind) %><small><%= movement_reason(movement) %></small><% if movement.order_item %><%= link_to "Sale ##{movement.order_item.order_id}", order_path(movement.order_item.order_id) %><small>Movement #<%= movement.id %><% if movement.reversal_of_id %> reverses #<%= movement.reversal_of_id %><% end %></small><% end %></td><td class="numeric"><%= signed_units(movement.quantity_delta) %></td><td class="numeric"><%= movement.resulting_balance %></td><td><%= movement.actor.email_address %></td></tr><% end %></tbody>
     </table></div>
     <%= render "shared/pagination" %>
   <% end %>

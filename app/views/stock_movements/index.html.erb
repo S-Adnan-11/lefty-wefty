@@ -1,16 +1,16 @@
-<% content_for :title, "Stock movements · Lefty-Wefty" %>
-<div class="page-heading"><div><p class="eyebrow">Stock ledger</p><h1>Stock movements</h1><p class="muted">Permanent stock changes · <%= Current.business.timezone %></p></div></div>
+<% content_for :title, "Stock history · Lefty-Wefty" %>
+<div class="page-heading"><div><p class="eyebrow">Stock history</p><h1>Stock history</h1><p class="muted">Permanent stock changes · <%= Current.business.timezone %></p></div></div>
 <%= form_with url: stock_movements_path, method: :get, class: "filters card" do |form| %>
   <div><%= form.label :product_id, "Product" %><%= form.select :product_id, @products.map { |product| ["#{product.name} (#{product.sku})", product.id] }, include_blank: "All products", selected: @product_id %></div>
-  <div><%= form.label :kind, "Movement type" %><%= form.select :kind, %w[opening receipt adjustment sale sale_void].map { |kind| [kind.humanize, kind] }, include_blank: "All types", selected: @kind %></div>
-  <%= form.submit "Filter movements" %><%= link_to "Clear filters", stock_movements_path %>
+  <div><%= form.label :kind, "Stock change type" %><%= form.select :kind, %w[opening receipt adjustment sale sale_void].map { |kind| [movement_label(kind), kind] }, include_blank: "All types", selected: @kind %></div>
+  <%= form.submit "Filter stock history" %><%= link_to "Clear filters", stock_movements_path %>
 <% end %>
 <section class="card">
-  <% if @movements.empty? %><p class="empty">No movements for this selection. <%= link_to "Browse products", products_path %> to receive stock, or clear the filters.</p><% else %>
-    <div class="table-scroll" tabindex="0" role="region" aria-label="Stock movements table"><table id="stock-movements">
+  <% if @movements.empty? %><p class="empty">No stock changes for this selection. <%= link_to "Browse products", products_path %> to receive stock, or clear the filters.</p><% else %>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Stock history table"><table id="stock-movements">
       <caption>Stock history for your business</caption>
       <thead><tr><th scope="col">When</th><th scope="col">Product</th><th scope="col">Type / reason</th><th scope="col">Change</th><th scope="col">Balance</th></tr></thead>
-      <tbody><% @movements.each do |movement| %><tr><td><%= local_time(movement.created_at) %></td><td><%= link_to movement.product.name, movement.product %><small><%= movement.product.sku %></small></td><td><%= movement.kind.humanize %><small><%= movement.reason %></small><% if movement.order_item %><%= link_to "Sale ##{movement.order_item.order_id}", order_path(movement.order_item.order_id) %><% if movement.reversal_of_id %><small>Reverses movement #<%= movement.reversal_of_id %></small><% end %><% end %></td><td class="numeric"><%= signed_units(movement.quantity_delta) %></td><td class="numeric"><%= number_with_delimiter(movement.resulting_balance) %></td></tr><% end %></tbody>
+      <tbody><% @movements.each do |movement| %><tr><td><%= local_time(movement.created_at) %></td><td><%= link_to movement.product.name, movement.product %><small><%= movement.product.sku %></small></td><td><%= movement_label(movement.kind) %><small><%= movement_reason(movement) %></small><% if movement.order_item %><%= link_to "Sale ##{movement.order_item.order_id}", order_path(movement.order_item.order_id) %><% if movement.reversal_of_id %><small>Reverses movement #<%= movement.reversal_of_id %></small><% end %><% end %></td><td class="numeric"><%= signed_units(movement.quantity_delta) %></td><td class="numeric"><%= number_with_delimiter(movement.resulting_balance) %></td></tr><% end %></tbody>
     </table></div><%= render "shared/pagination" %>
   <% end %>
 </section>

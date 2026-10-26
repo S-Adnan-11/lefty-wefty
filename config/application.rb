@@ -5,7 +5,7 @@ require "rails"
 require "active_model/railtie"
 require "active_job/railtie"
 require "active_record/railtie"
-# require "active_storage/engine"
+require "active_storage/engine"
 require "action_controller/railtie"
 require "action_mailer/railtie"
 # require "action_mailbox/engine"
@@ -26,6 +26,10 @@ module LeftyWefty
     config.active_record.schema_format = :sql
     config.active_job.queue_adapter = :async
     config.log_formatter = RedactingLogFormatter.new
+    # All logo reads go through the authenticated business controller.
+    config.active_storage.draw_routes = false
+    config.active_storage.analyzers = []
+    config.active_storage.previewers = []
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
