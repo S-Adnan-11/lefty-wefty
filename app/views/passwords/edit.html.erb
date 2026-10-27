@@ -1,10 +1,14 @@
-<% content_for :title, "Choose a password · Lefty-Wefty" %>
+<% content_for :title, "Choose a new password · Lefty-Wefty" %>
 <div class="auth-card">
+  <p class="eyebrow">Account recovery</p>
   <h1>Choose a new password</h1>
+  <p id="password-requirements" class="muted">Use 12–72 characters. A long, unique passphrase works well.</p>
   <%= render "shared/errors", object: @user %>
-  <%= form_with url: password_path(params[:token]), method: :put, class: "stack" do |form| %>
-    <div><%= form.label :password, "New password" %><%= form.password_field :password, required: true, minlength: 12, maxlength: 72, autocomplete: "new-password" %></div>
-    <div><%= form.label :password_confirmation, "Confirm new password" %><%= form.password_field :password_confirmation, required: true, autocomplete: "new-password" %></div>
-    <%= form.submit "Reset password" %>
+  <%= form_with url: password_path(params[:token]), method: :put, class: "stack", data: { pending: true } do %>
+    <%= render "shared/password_field", name: :password, label: "New password", object: @user %>
+    <%= render "shared/password_field", name: :password_confirmation, label: "Confirm new password", object: @user %>
+    <%= submit_tag "Reset password" %>
+    <p role="status" data-submission-status></p>
   <% end %>
+  <p class="auth-back"><%= link_to "Back to log in", new_session_path %></p>
 </div>

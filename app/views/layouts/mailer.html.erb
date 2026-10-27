@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <style>
-      /* Email styles need to be inline */
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Lefty-Wefty</title>
   </head>
 
-  <body>
-    <%= yield %>
+  <body style="margin:0;padding:24px 12px;background:#f4f7f2;color:#203a32;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;">
+    <table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td align="center">
+      <table role="presentation" style="width:100%;max-width:560px;border-collapse:separate;background:#ffffff;border:1px solid #dce5dc;border-radius:10px;">
+        <tr><td style="padding:28px 28px 20px;font-size:20px;font-weight:bold;color:#245c43;">Lefty-Wefty</td></tr>
+        <tr><td style="padding:0 28px 28px;"><%= yield %></td></tr>
+      </table>
+    </td></tr></table>
   </body>
 </html>

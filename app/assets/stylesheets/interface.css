@@ -105,6 +105,13 @@ button:active, input[type=submit]:active, .button:active { background: var(--pri
 .account-panel button.button-danger-text:active { background: #fee4e2; }
 .account-panel button.button-danger-text:focus-visible { outline-color: var(--danger); }
 .destructive-choice { color: var(--danger); }
+.development-notice { margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: #f4f7f2; font-size: .95rem; }
+.development-notice p { margin: .35rem 0 0; }
+.auth-back { margin-top: 1.25rem; }
+.password-control { display: flex; gap: .5rem; align-items: stretch; }
+.password-control input { min-width: 0; flex: 1; }
+.password-toggle { flex: 0 0 66px; padding-inline: .5rem; }
+.field-error { margin: .4rem 0 0; color: var(--danger); font-size: .95rem; }
 @media (max-width: 1180px) {
   .header-inner { flex-wrap: wrap; gap: .4rem; padding-block: .7rem; }
   .header-controls { width: 100%; justify-content: flex-end; }

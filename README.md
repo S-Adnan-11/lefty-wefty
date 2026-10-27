@@ -1,6 +1,6 @@
 # Lefty-Wefty
 
-An owner-operated inventory and sales application built with Ruby on Rails, PostgreSQL, and server-rendered ERB.
+Lefty-Wefty helps small businesses track products, stock and sales. It uses Ruby on Rails, PostgreSQL and server-rendered ERB.
 
 Manage products, receive stock, record sales, and cancel completed sales with an auditable stock history. Each account owns one isolated business. Enter prices in naira; storage and calculations use integer minor units. Quantities are whole units. Businesses use NGN and Africa/Lagos.
 
@@ -60,7 +60,11 @@ Production requires an explicitly configured persistent upload root or a named s
 
 `ruby bin/rails db:seed` adds two fictional businesses with different stock and a shared SKU. Repeating it preserves existing products, balances, account passwords, and history. Sample accounts have random passwords with no shared credential.
 
-In development, open [mail previews](http://localhost:3000/rails/mailers/passwords_mailer/reset?email=cedar@example.test) to choose a sample account password. Add `?email=your-address` to preview another existing account. Previews are a local developer feature. Reset requests retain mail in memory; **external email delivery is not configured or verified**. A successful password reset revokes existing sessions. Reset links expire after 15 minutes.
+In development, **Forgot your password?** prepares a reset message in Action Mailer's in-memory deliveries. It does not send email to an inbox. Known and unknown email addresses receive the same acknowledgement. A valid reset link lasts 15 minutes; opening it does not change a password. Saving a valid new password revokes the account's existing sessions and invalidates previous reset links.
+
+The [development mail preview](http://localhost:3000/rails/mailers/passwords_mailer/reset) shows the HTML/plain-text templates with a fictional address and an unusable link. It does not look up accounts or retrieve a requested message, and an `email` query parameter does not select a user. For local request/capture testing, use one Rails console process with a disposable account and `app.post "/passwords", params: { email_address: "your-disposable-address@example.test" }`; inspect the corresponding `ActionMailer::Base.deliveries.last` in that process. Deliveries in a running web server are not shared with a separate console. Treat messages and reset links as credentials; keep them out of logs, screenshots and source control.
+
+Production previews and recovery delivery are disabled. External email remains unconfigured and unverified. Before enabling `config.x.password_recovery_delivery = :email`, configure and verify the mail transport, an owned `LEFTY_WEFTY_MAIL_FROM` sender and `LEFTY_WEFTY_APP_HOST` host. Development uses the reserved `example.test` sender only for local capture. No SMTP account or hosted email service is included.
 
 ## Using stock
 
@@ -81,7 +85,7 @@ The account menu contains **My account**, **Business settings**, and **Log out**
 2. **Save draft for review** shows the server's product prices and total. Drafts do not reserve or deduct stock. You can edit or discard them.
 3. **Record sale** rechecks active products, current prices, and stock. A changed price or edited draft requires renewed review. If any line lacks stock, the entire sale stays a draft and no stock changes. Edit it or receive stock, then retry.
 4. A completed sale records its original product names, SKUs, prices, quantities, total, confirmation time, and owner. Later product edits and archiving preserve those snapshots. Follow **Product stock history**; sale movements link back to their sale.
-5. To correct a recorded sale, enter a reason, tick the explicit confirmation, and choose **Cancel completed sale**. This cancels the entire sale and restores exactly its original quantities, even for archived products. Deductions, snapshots, and linked reversals remain visible. A cancelled sale cannot be reactivated.
+5. To correct a recorded sale, enter a reason, tick the explicit confirmation, and choose **Cancel sale**. This cancels the entire sale and restores exactly its original quantities, even for archived products. Deductions, snapshots, and linked reversals remain visible. A cancelled sale cannot be reactivated.
 
 The application records sales and stock; it does not collect or refund money. There are no partial voids, discounts, tax calculations, manual sale price overrides, or backdated sales. Line totals and sale totals use integer minor units and must fit a signed 64-bit integer (maximum 9,223,372,036,854,775,807). A reversal that would exceed the stock quantity limit is rejected atomically; correct the physical stock count before retrying.
 

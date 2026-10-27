@@ -1,4 +1,10 @@
-You can reset your password on
-<%= edit_password_url(@user.password_reset_token) %>
+Lefty-Wefty
 
-This link will expire in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+Reset your password
+
+Use this link to choose a new password:
+<%= @reset_url %>
+
+This link expires in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
+
+If you did not ask to reset your password, you can ignore this email.

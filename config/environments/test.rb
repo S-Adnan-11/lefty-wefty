@@ -32,6 +32,9 @@ Rails.application.configure do
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
   config.action_mailer.delivery_method = :test
+  config.action_mailer.logger = nil
+  config.x.password_recovery_delivery = :local
+  config.x.mail_sender = "Lefty-Wefty <no-reply@example.test>"
 
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "example.com" }

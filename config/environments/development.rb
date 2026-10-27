@@ -32,6 +32,8 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = false
   config.action_mailer.delivery_method = :test
   config.action_mailer.logger = nil
+  config.x.password_recovery_delivery = :local
+  config.x.mail_sender = "Lefty-Wefty <no-reply@example.test>"
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false

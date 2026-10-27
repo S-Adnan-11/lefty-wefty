@@ -1,10 +1,19 @@
-<% content_for :title, "Reset password · Lefty-Wefty" %>
+<% content_for :title, "Forgot your password? · Lefty-Wefty" %>
 <div class="auth-card">
   <p class="eyebrow">Account recovery</p>
-  <h1>Reset your password</h1>
-  <p class="muted">In local development, reset emails stay on this machine. View the <%= link_to "development mail preview", "/rails/mailers/passwords_mailer/reset" %> to open a reset link. External email delivery is not configured.</p>
-  <%= form_with url: passwords_path, class: "stack" do |form| %>
-    <div><%= form.label :email_address, "Email address" %><%= form.email_field :email_address, required: true, autocomplete: "email" %></div>
-    <%= form.submit "Prepare reset instructions" %>
+  <h1>Forgot your password?</h1>
+  <% if %i[local email].include?(password_recovery_mode) %>
+    <p>Enter the email address you use to log in.</p>
+    <%= form_with url: passwords_path, class: "stack", data: { pending: true } do |form| %>
+      <div><%= form.label :email_address, "Email address" %><%= form.email_field :email_address, required: true, autocomplete: "email", maxlength: 254 %></div>
+      <%= form.submit password_recovery_mode == :local ? "Prepare reset link" : "Send reset link" %>
+      <p role="status" data-submission-status></p>
+    <% end %>
+    <% if Rails.env.development? && password_recovery_mode == :local %>
+      <aside class="development-notice"><strong>Local development</strong><p>Reset emails are kept on this computer. They are not delivered to an inbox.</p></aside>
+    <% end %>
+  <% else %>
+    <p>Password recovery is not available on this installation yet.</p>
   <% end %>
+  <p class="auth-back"><%= link_to "Back to log in", new_session_path %></p>
 </div>

@@ -26,6 +26,8 @@ module LeftyWefty
     config.active_record.schema_format = :sql
     config.active_job.queue_adapter = :async
     config.log_formatter = RedactingLogFormatter.new
+    config.x.password_recovery_delivery = :unavailable
+    config.x.mail_sender = ENV["LEFTY_WEFTY_MAIL_FROM"]
     # All logo reads go through the authenticated business controller.
     config.active_storage.draw_routes = false
     config.active_storage.analyzers = []
