@@ -34,6 +34,8 @@ jobs:
           printf '%s\n' 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main' | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y postgresql-client-18
+      - name: Build the S3-compatible fixture from pinned public source
+        run: bundle exec ruby script/ci/build_objects.rb
       - name: Prepare isolated PostgreSQL and object storage
         run: bundle exec ruby script/ci/prepare.rb
       - name: Verify schema creation, SQL restoration and upgrade

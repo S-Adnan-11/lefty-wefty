@@ -45,11 +45,11 @@ end
 command!("docker", "network", "create", network)
 command!("docker", "run", "--detach", "--name", "lefty-wefty-ci-postgres", "--network", network, "--network-alias", "postgres",
   "--publish", "127.0.0.1:55433:5432", "--env-file", File.join(directory, "postgres.env"),
-  "--volume", "#{directory}/certs:/certs:ro", "--entrypoint", "sh", "postgres:18.6",
+  "--volume", "#{directory}/certs:/certs:ro", "--entrypoint", "sh", "postgres:18.6@sha256:edb0c08dc33befd0262ab3b5cf1c4f3f8cfd8b09e88c05b45adee29d6761ddb6",
   "-c", "cp /certs/server.key /tmp/server.key && chown postgres:postgres /tmp/server.key && chmod 600 /tmp/server.key && exec docker-entrypoint.sh postgres -c ssl=on -c ssl_cert_file=/certs/server.crt -c ssl_key_file=/tmp/server.key")
 command!("docker", "run", "--detach", "--name", "lefty-wefty-ci-objects", "--network", network, "--network-alias", "s3.test", "--network-alias", "wrong.test",
   "--publish", "127.0.0.1:59000:9000", "--env-file", File.join(directory, "minio.env"),
-  "--volume", "#{directory}/certs:/certs:ro", "quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z", "server", "/data", "--certs-dir", "/certs")
+  "--volume", "#{directory}/certs:/certs:ro", "lefty-wefty-ci-objects", "server", "/data", "--certs-dir", "/certs")
 ca_path = File.join(directory, "certs/ca.crt")
 admin_options = { host: "127.0.0.1", port: 55433, user: "postgres", password: database_password, dbname: "postgres", sslmode: "verify-full", sslrootcert: ca_path, channel_binding: "require", connect_timeout: 2 }
 admin = nil
