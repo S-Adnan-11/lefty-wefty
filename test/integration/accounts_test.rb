@@ -15,7 +15,8 @@ class AccountsTest < ActionDispatch::IntegrationTest
     assert_equal "Africa/Lagos", user.business.timezone
     follow_redirect!
     assert_response :success
-    assert_select "h1", "New business"
+    assert_select "h1", "Overview"
+    assert_select ".business-name", "New business"
   end
 
   test "invalid business or user leaves no partial signup" do
@@ -36,10 +37,17 @@ class AccountsTest < ActionDispatch::IntegrationTest
     assert_response :success
     Session.find(session_id).update!(created_at: 15.days.ago)
     get root_path
+    assert_response :success
+    assert_select "h1", "Stock and sales, in order."
+    assert_select ".business-name", count: 0
+    get products_path
     assert_redirected_to new_session_path
     post session_path, params: { email_address: user.email_address, password: "test owner passphrase" }
     delete session_path
     get root_path
+    assert_response :success
+    assert_select ".business-name", count: 0
+    get products_path
     assert_redirected_to new_session_path
   end
 

@@ -1,0 +1,6 @@
+Rubik
+Copyright (c) 2015 by Hubert & Fischer. All rights reserved.
+Hebrew characters (c) 2016 by Meir Sadan.
+Bundled regular and bold font files are distributed under the SIL Open Font License 1.1.
+The included OFL-Rubik.txt contains the license and upstream notices.
+Font family source: https://fonts.google.com/specimen/Rubik

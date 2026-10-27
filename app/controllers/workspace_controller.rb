@@ -1,5 +1,12 @@
 class WorkspaceController < ApplicationController
+  allow_unauthenticated_access only: :show
+
   def show
+    unless authenticated?
+      @public_introduction = true
+      request.env["lefty_wefty.public_page"] = true
+      return render "public_pages/home"
+    end
     @active_count = Current.business.products.active.count
     @low_stock_count = Current.business.products.low_stock.count
     @total_units = Current.business.products.active.sum(:quantity)

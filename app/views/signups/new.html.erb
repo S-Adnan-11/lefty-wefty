@@ -1,7 +1,6 @@
 <% content_for :title, "Create your account · Lefty-Wefty" %>
 <div class="auth-card">
-  <p class="eyebrow">Make room for clarity</p>
-  <h1>Your stock. Overview.</h1>
+  <h1>Create your account</h1>
   <p class="muted">Keep your products, stock and sales together. Prices are in naira.</p>
   <%= render "shared/errors", object: @user %>
   <%= form_with model: @user, url: signup_path, class: "stack" do |form| %>

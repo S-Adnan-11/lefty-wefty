@@ -1,0 +1,31 @@
+<meta name="description" content="<%= PublicSite::DESCRIPTION %>">
+<meta name="robots" content="<%= @public_introduction && PublicSite.indexing? ? 'index, follow' : 'noindex, nofollow' %>">
+<meta name="theme-color" content="#F4F7F2">
+<meta name="application-name" content="Lefty-Wefty">
+<link rel="icon" href="/brand/icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/brand/icons/favicon-96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="/brand/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="mask-icon" href="/brand/icons/safari-pinned-tab.svg" color="#245C43">
+<link rel="manifest" href="/brand/site.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Lefty-Wefty">
+<meta property="og:title" content="<%= PublicSite::TITLE %>">
+<meta property="og:description" content="<%= PublicSite::DESCRIPTION %>">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= PublicSite::TITLE %>">
+<meta name="twitter:description" content="<%= PublicSite::DESCRIPTION %>">
+<% if PublicSite.indexing? %>
+  <meta property="og:image" content="<%= PublicSite.url('/brand/social/og-image.png') %>">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="<%= PublicSite::IMAGE_ALT %>">
+  <meta name="twitter:image" content="<%= PublicSite.url('/brand/social/og-image.png') %>">
+  <meta name="twitter:image:alt" content="<%= PublicSite::IMAGE_ALT %>">
+  <% if @public_introduction %>
+    <link rel="canonical" href="<%= PublicSite.url %>">
+    <meta property="og:url" content="<%= PublicSite.url %>">
+    <script type="application/ld+json"><%= raw json_escape({ "@context" => "https://schema.org", "@type" => "WebSite", name: PublicSite::NAME, alternateName: "Lefty Wefty", url: PublicSite.url, description: PublicSite::DESCRIPTION, inLanguage: "en" }.to_json) %></script>
+  <% end %>
+<% end %>

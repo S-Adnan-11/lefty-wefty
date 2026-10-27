@@ -9,6 +9,9 @@ class PasswordsMailerTest < ActionMailer::TestCase
     assert_equal [ user.email_address ], message.to
     assert_equal "Reset your password", message.subject
     html = Nokogiri::HTML(message.html_part.body.decoded)
+    assert_equal "Lefty-Wefty", html.at_css("img")["alt"]
+    assert html.at_css("img")["src"].start_with?("cid:")
+    assert_equal File.binread(Rails.root.join("public/brand/logos/email-logo.png")), message.attachments["lefty-wefty.png"].body.decoded.b
     assert_equal "Lefty-Wefty", html.at_css("title").text
     assert_equal "Reset password", html.at_css("a").text
     assert html.at_css("a")["style"].include?("#1d4ed8")

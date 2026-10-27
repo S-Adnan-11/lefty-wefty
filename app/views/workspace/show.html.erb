@@ -1,19 +1,19 @@
-<% content_for :title, "#{Current.business.name} · Lefty-Wefty" %>
+<% content_for :title, "Overview | Lefty-Wefty" %>
 <div class="page-heading">
-  <div><p class="eyebrow">Overview</p><h1><%= Current.business.name %></h1><p class="muted">Stock at a glance · <%= Current.business.currency %> · <%= Current.business.timezone %></p></div>
-  <%= link_to "Add product", new_product_path, class: "button button-primary" %>
+  <div><h1>Overview</h1><p class="muted">Stock at a glance · <%= Current.business.currency %> · <%= Current.business.timezone %></p></div>
+  <div class="actions"><%= link_to "Record sale", new_order_path, class: "button button-primary" %><%= link_to "Add product", new_product_path, class: "button button-primary" %></div>
 </div>
-<div class="metrics">
+<div class="metrics overview-metrics">
+  <section class="card month-summary">
+    <span><%= @month_sales.current_month.strftime("%B %Y") %> · month to date</span>
+    <strong id="month-sales-value" class="price"><%= money_minor(@month_sales.total_minor) %></strong>
+    <p><span id="month-sale-count"><%= number_with_delimiter(@month_sales.sale_count) %></span> completed sales · <%= link_to "Monthly report", report_path %></p>
+  </section>
   <div class="card"><span>Active products</span><strong><%= @active_count %></strong></div>
   <div class="card"><span>Units in active stock</span><strong><%= number_with_delimiter(@total_units) %></strong></div>
   <div class="card"><span>Low-stock products</span><strong><%= @low_stock_count %></strong></div>
 </div>
-<div class="workspace-grid">
-  <section class="card">
-    <div class="section-heading"><h2><%= @month_sales.current_month.strftime("%B %Y") %> · month to date</h2><%= link_to "Monthly report", report_path %></div>
-    <dl class="sales-summary"><dt>Completed sales</dt><dd id="month-sale-count"><%= number_with_delimiter(@month_sales.sale_count) %></dd><dt>Sales value</dt><dd id="month-sales-value"><%= money_minor(@month_sales.total_minor) %></dd></dl>
-    <p class="muted">Completed sales this month, using recorded prices.</p>
-  </section>
+<div class="workspace-grid overview-grid">
   <section class="card">
     <div class="section-heading"><h2>Recent sales</h2><%= link_to "All sales", orders_path %></div>
     <% if @recent_sales.empty? %><p class="empty">No recorded sales yet. <%= link_to "Create a draft", new_order_path %> to review products and prices.</p><% else %>
@@ -26,10 +26,10 @@
     <% if @low_stock.empty? %>
       <p class="empty">No products need restocking. <%= link_to "Browse products", products_path %> or add your first product.</p>
     <% else %>
-      <ul class="record-list"><% @low_stock.each do |product| %><li><div><%= link_to product.name, product %><small><%= product.sku %></small></div><span class="badge warning"><%= product.quantity %> left</span></li><% end %></ul>
+      <ul class="record-list"><% @low_stock.each do |product| %><li><div><%= link_to product.name, product %><small><%= product.sku %></small></div><span class="badge warning"><%= product.quantity %> left</span><%= link_to product_path(product, anchor: "stock-change"), class: "stock-shortcut" do %>Add stock<span class="sr-only"> for <%= product.name %></span><% end %></li><% end %></ul>
     <% end %>
   </section>
-  <section class="card">
+  <section class="card recent-stock">
     <div class="section-heading"><h2>Recent stock changes</h2><%= link_to "All stock history", stock_movements_path %></div>
     <% if @recent_movements.empty? %>
       <p class="empty">Your stock history starts with your first receipt or adjustment.</p>

@@ -10,7 +10,7 @@ class InventoryTest < ActionDispatch::IntegrationTest
   end
 
   test "all inventory requests require authentication" do
-    [ root_path, products_path, product_path(@product), new_product_path, edit_product_path(@product) ].each do |path|
+    [ products_path, product_path(@product), new_product_path, edit_product_path(@product) ].each do |path|
       get path
       assert_redirected_to new_session_path
     end
@@ -33,7 +33,8 @@ class InventoryTest < ActionDispatch::IntegrationTest
     assert_select "a", text: @product.name
     assert_select "a", text: @foreign.name, count: 0
     get root_path, params: { business_id: @other.business.id }
-    assert_select "h1", @owner.business.name
+    assert_select "h1", "Overview"
+    assert_select ".business-name", @owner.business.name
     assert_select ".metrics strong", text: "1", count: 2
     assert_select ".metrics strong", text: "0", count: 1
     assert_select "a", text: @foreign.name, count: 0

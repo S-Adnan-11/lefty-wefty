@@ -1,4 +1,8 @@
+<img src="public/brand/logos/logo-horizontal.svg" alt="Lefty-Wefty" width="247" height="48">
+
 # Lefty-Wefty
+
+Stock and sales, in order.
 
 Lefty-Wefty helps small businesses track products, stock and sales. It uses Ruby on Rails, PostgreSQL and server-rendered ERB.
 
@@ -47,6 +51,16 @@ Remove-Item Env:RAILS_ENV
 ```
 
 Use **Create account** to create an owner and business together. Passwords require at least 12 characters and cannot exceed bcrypt's 72-byte limit. No external service is required.
+
+### Public pages and search settings
+
+Visitors see a short introduction at `/`; signed-in owners see Overview at the same address. The introduction, account forms and stock/sales workflows work without JavaScript. Private pages require authentication and carry `noindex, nofollow`, including when public indexing is enabled. Shared previews use generic brand artwork rather than business data.
+
+Public indexing defaults off. The introduction omits canonical, absolute share-image URLs and structured data until both `LEFTY_WEFTY_PUBLIC_ORIGIN` and `LEFTY_WEFTY_PUBLIC_INDEXING=true` are configured. The origin must be the actual HTTPS production origin, with no credentials, path, query, fragment or custom port. Public metadata never uses the request Host header. Do not enable indexing for local development or a staging site.
+
+`/sitemap.xml` returns 404 while indexing is off or the origin is invalid. When enabled, it lists only the public root; `/robots.txt` advertises that sitemap and permits fetching pages and assets so crawlers can read their indexing directives. Authentication protects business data; robots rules do not provide access control. Deployment must also configure allowed hosts, HTTPS and the real email host separately. Search indexing, live share previews and search-engine verification require checks at the deployed URL.
+
+Brand logos, icons, share images and the browser-mode manifest are in [`public/brand`](public/brand). The manifest supplies browser identity; it does not add offline support. The bundled Rubik fonts retain their [SIL Open Font License](public/brand/fonts/OFL-Rubik.txt) and [notices](public/brand/fonts/NOTICE.txt). The [brand guide](public/brand/brand-guide.md) explains the supplied variants.
 
 ### Logo storage
 

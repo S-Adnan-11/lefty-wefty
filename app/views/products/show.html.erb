@@ -9,8 +9,8 @@
 <% if @product.archived? %>
   <div class="card"><h2>Archived product</h2><p>Quantity and movement history are preserved. New stock changes are disabled.</p></div>
 <% else %>
-  <section class="card form-card stock-form">
-    <h2>Record a stock change</h2>
+  <section class="card form-card stock-form" id="stock-change" tabindex="-1" aria-labelledby="stock-change-heading">
+    <h2 id="stock-change-heading">Record a stock change</h2>
     <p class="muted">Receive new stock or correct a count. Corrections need a reason.</p>
     <%= render "shared/errors", object: @change %>
     <%= form_with model: @change, url: product_stock_movements_path(@product), class: "stack" do |form| %>

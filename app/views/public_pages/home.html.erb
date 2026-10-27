@@ -1,0 +1,11 @@
+<% content_for :title, PublicSite::TITLE %>
+<section class="public-intro">
+  <h1>Stock and sales, in order.</h1>
+  <p>Keep your products, stock and sales in one place. See what is running low and record each sale without losing track of your stock.</p>
+  <div class="actions"><%= link_to "Create account", signup_path, class: "button button-primary" %><%= link_to "Log in", new_session_path, class: "button button-secondary" %></div>
+</section>
+<div class="public-features">
+  <section class="card"><h2>Know what is in stock</h2><p>Add products, record deliveries and check what needs restocking.</p></section>
+  <section class="card"><h2>Keep sales in order</h2><p>Save a draft, review the prices and record the sale when it is ready.</p></section>
+  <section class="card"><h2>See the monthly totals</h2><p>Check your completed sales, units sold and totals by month.</p></section>
+</div>

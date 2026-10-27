@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
     <title><%= content_for(:title) || "Lefty-Wefty · Inventory" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light">
+    <%= render "shared/site_metadata" %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%= stylesheet_link_tag "application", "interface" %>
+    <%= stylesheet_link_tag "/brand/fonts/fonts.css", "application", "interface" %>
     <%= javascript_include_tag "application", defer: true %>
   </head>
   <body>
@@ -14,8 +16,8 @@
     <header class="site-header">
       <div class="header-inner">
         <div class="header-identity">
-          <%= link_to root_path, class: "brand" do %><span class="brand-mark" aria-hidden="true">LW</span><span>Lefty-Wefty</span><% end %>
-          <% if authenticated? %><span class="identity-chevron" aria-hidden="true">›</span><div class="business-identity"><span class="logo-frame"><%= business_avatar(Current.business) %></span><span class="business-name" tabindex="0" title="<%= Current.business.name %>"><%= Current.business.name %></span></div><% end %>
+          <%= link_to root_path, class: "brand" do %><%= image_tag "/brand/logos/logo-horizontal.svg", alt: "Lefty-Wefty", width: 165, height: 32 %><% end %>
+          <% if authenticated? %><div class="business-identity"><span class="logo-frame"><%= business_avatar(Current.business) %></span><span class="business-name" tabindex="0" title="<%= Current.business.name %>"><%= Current.business.name %></span></div><% end %>
         </div>
         <div class="header-controls"><nav aria-label="Main navigation">
           <% if authenticated? %>
@@ -39,6 +41,6 @@
       <% end %>
       <%= yield %>
     </main>
-    <footer class="container footer">Lefty-Wefty · A clearer view of your stock.</footer>
+    <footer class="container footer"><%= image_tag "/brand/logos/logo-horizontal.svg", alt: "Lefty-Wefty", width: 165, height: 32 %><span>Track products, stock and sales.</span></footer>
   </body>
 </html>

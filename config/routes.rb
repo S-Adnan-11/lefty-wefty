@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   root "workspace#show"
+  get "robots.txt", to: "public_pages#robots", defaults: { format: :text }
+  get "sitemap.xml", to: "public_pages#sitemap", defaults: { format: :xml }
   resource :account, only: %i[show update]
   resource :business_settings, only: %i[edit update], controller: "business_settings" do
     get :logo
