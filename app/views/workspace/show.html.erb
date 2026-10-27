@@ -1,7 +1,7 @@
 <% content_for :title, "#{Current.business.name} · Lefty-Wefty" %>
 <div class="page-heading">
   <div><p class="eyebrow">Overview</p><h1><%= Current.business.name %></h1><p class="muted">Stock at a glance · <%= Current.business.currency %> · <%= Current.business.timezone %></p></div>
-  <%= link_to "Add product", new_product_path, class: "button" %>
+  <%= link_to "Add product", new_product_path, class: "button button-primary" %>
 </div>
 <div class="metrics">
   <div class="card"><span>Active products</span><strong><%= @active_count %></strong></div>

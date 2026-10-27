@@ -1,5 +1,5 @@
 <% content_for :title, "Sales · Lefty-Wefty" %>
-<div class="page-heading"><div><p class="eyebrow">Recorded sales</p><h1>Sales</h1><p class="muted">Draft, record, and follow each sale's stock history.</p></div><%= link_to "New sale", new_order_path, class: "button" %></div>
+<div class="page-heading"><div><p class="eyebrow">Recorded sales</p><h1>Sales</h1><p class="muted">Draft, record, and follow each sale's stock history.</p></div><%= link_to "New sale", new_order_path, class: "button button-primary" %></div>
 <%= form_with url: orders_path, method: :get, class: "filters card" do |form| %>
   <div><%= form.label :reference, "Sale reference (number or #number)" %><%= form.search_field :reference, value: @reference, maxlength: 40 %></div>
   <div><%= form.label :status, "Sale status" %><%= form.select :status, [["All statuses", ""], ["Draft", "draft"], ["Completed", "confirmed"], ["Cancelled", "voided"]], selected: @status %></div><%= form.submit "Filter sales" %><%= link_to "Clear filters", orders_path %>

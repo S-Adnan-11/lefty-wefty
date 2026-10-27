@@ -48,6 +48,9 @@ input[aria-invalid=true], .field_with_errors input, .field_with_errors textarea 
 .card, .auth-card { border-radius: 11px; box-shadow: 0 2px 3px #203a3203; }
 .page-heading > .button { flex-shrink: 0; white-space: nowrap; }
 .numeric { text-align: right; }
+.product-actions { display: flex; justify-content: flex-end; gap: .4rem; white-space: nowrap; }
+.product-actions .button { position: relative; padding: .45rem .7rem; font-size: .85rem; }
+#archive-product { scroll-margin-block: 1.5rem; }
 th.numeric, td.numeric { text-align: right; }
 .badge { font-size: .82rem; }
 .neutral { background: #edf2ed; color: #455e4f; }
@@ -87,7 +90,7 @@ th.numeric, td.numeric { text-align: right; }
 .record-list li > div { flex: 1 1 8rem; }
 .record-list li > strong { flex: 0 1 auto; max-width: 100%; margin-left: auto; white-space: nowrap; overflow-wrap: normal; }
 button[hidden], [hidden] { display: none !important; }
-/* Green is the default action colour; blue marks final saves and confirmations. */
+/* Green is the default action colour; selected primary actions use blue. */
 button, input[type=submit], .button { background: var(--green); border-color: var(--green); color: white; }
 button:hover, input[type=submit]:hover, .button:hover { background: var(--green-hover); }
 button:active, input[type=submit]:active, .button:active { background: #1c4b36; }
