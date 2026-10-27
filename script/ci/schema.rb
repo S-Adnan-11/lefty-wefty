@@ -13,11 +13,19 @@ def command!(env, *command, input: "")
   output, error, status = Open3.capture3(env, *command, stdin_data: input)
   unless status.success?
     File.write(File.join(ENV.fetch("LEFTY_WEFTY_CI_DIRECTORY"), "schema-error.txt"), output + error, perm: 0o600)
-    details = (output + error).byteslice(-4000, 4000) || output + error
+    details = (output + error).byteslice(0, 3000).to_s + (error.byteslice(-1000, 1000) || "")
     details = details.gsub(ENV.fetch("LEFTY_WEFTY_DB_PASSWORD"), "[FILTERED]")
     warn details.gsub(%r{postgres(?:ql)?://[^\s"'<>]+}, "[FILTERED_DATABASE_URL]")
     raise "Isolated schema check failed; no application data was used."
   end
+end
+def migrate_to!(env, version = nil)
+  code = <<~RUBY
+    raise "Unsafe migration target" unless ActiveRecord::Base.connection_db_config.database.match?(/\\Alefty_wefty_ci_(?:fresh|upgrade)\\z/)
+    ActiveRecord::Migration.verbose = false
+    ActiveRecord::MigrationContext.new(Rails.root.join("db/migrate").to_s).migrate(#{version.inspect})
+  RUBY
+  command!(env, "bundle", "exec", "ruby", "bin/rails", "runner", "-", input: code)
 end
 %w[fresh restore upgrade].each do |kind|
   database = "lefty_wefty_ci_#{kind}"
@@ -31,9 +39,9 @@ end
     command!({ "PGDATABASE" => database, "PGHOST" => base.fetch(:host), "PGPORT" => base.fetch(:port), "PGUSER" => base.fetch(:user), "PGPASSWORD" => base.fetch(:password) },
       "psql", "-X", "-v", "ON_ERROR_STOP=1", "-f", "db/structure.sql")
   when "fresh"
-    command!(env, "bundle", "exec", "ruby", "bin/rails", "db:migrate")
+    migrate_to!(env)
   when "upgrade"
-    command!(env, "bundle", "exec", "ruby", "bin/rails", "db:migrate", "VERSION=20261025150001")
+    migrate_to!(env, 20261025150001)
     code = <<~RUBY
       raise "Unsafe upgrade target" unless ActiveRecord::Base.connection_db_config.database == "lefty_wefty_ci_upgrade"
       owner = User.create!(email_address: "upgrade@example.test", password: SecureRandom.hex(24))
@@ -45,7 +53,7 @@ end
     before = %w[users businesses products inventory_logs].to_h do |table|
       [ table, connection.exec("SELECT md5(string_agg(to_jsonb(t)::text, '' ORDER BY id)) FROM #{table} t").getvalue(0, 0) ]
     end
-    command!(env, "bundle", "exec", "ruby", "bin/rails", "db:migrate")
+    migrate_to!(env)
     after = before.keys.to_h do |table|
       [ table, connection.exec("SELECT md5(string_agg(to_jsonb(t)::text, '' ORDER BY id)) FROM #{table} t").getvalue(0, 0) ]
     end
