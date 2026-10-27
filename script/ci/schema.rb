@@ -1,6 +1,7 @@
 require "pg"
 require "open3"
 require "json"
+require_relative "schema_contract"
 
 abort "Disposable CI only." unless ENV["GITHUB_ACTIONS"] == "true" && ENV["LEFTY_WEFTY_CI_DIRECTORY"]
 directory = ENV.fetch("LEFTY_WEFTY_CI_DIRECTORY")
@@ -64,11 +65,7 @@ end
     raise "Upgrade altered existing records" unless before == after
     raise "Upgrade linked legacy stock to a new sale" unless connection.exec("SELECT count(*) FROM inventory_logs WHERE order_item_id IS NOT NULL OR reversal_of_id IS NOT NULL").getvalue(0, 0) == "0"
   end
-  contract = {
-    constraints: connection.exec("SELECT conrelid::regclass::text, conname, pg_get_constraintdef(oid) FROM pg_constraint WHERE connamespace='public'::regnamespace ORDER BY 1,2").values,
-    triggers: connection.exec("SELECT tgrelid::regclass::text, tgname, pg_get_triggerdef(oid) FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN (SELECT oid FROM pg_class WHERE relnamespace='public'::regnamespace) ORDER BY 1,2").values,
-    functions: connection.exec("SELECT proname, pg_get_functiondef(oid) FROM pg_proc WHERE pronamespace='public'::regnamespace ORDER BY proname").values
-  }
+  contract = SchemaContract.capture(connection)
   raise "Expected transaction/tenant constraints and triggers" unless contract[:constraints].size >= 20 && contract[:triggers].size >= 5
   contracts << contract
   unless kind == "upgrade"
