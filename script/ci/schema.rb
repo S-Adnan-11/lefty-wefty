@@ -1,6 +1,7 @@
 require "pg"
 require "open3"
 require "json"
+require "digest"
 require_relative "schema_contract"
 
 abort "Disposable CI only." unless ENV["GITHUB_ACTIONS"] == "true" && ENV["LEFTY_WEFTY_CI_DIRECTORY"]
@@ -10,6 +11,7 @@ base = {
   password: ENV.fetch("LEFTY_WEFTY_DB_PASSWORD"), sslmode: "verify-full", sslrootcert: ENV.fetch("PGSSLROOTCERT"), channel_binding: "require"
 }
 contracts = []
+schema_digest = Digest::SHA256.file("db/structure.sql").hexdigest
 def command!(env, *command, input: "")
   output, error, status = Open3.capture3(env, *command, stdin_data: input)
   unless status.success?
@@ -76,4 +78,5 @@ end
 end
 raise "Migrations, SQL restore and upgrade disagree" unless contracts.uniq.size == 1
 command!({ "RAILS_ENV" => "test" }, "bundle", "exec", "ruby", "bin/rails", "db:migrate")
+raise "Test preparation rewrote the shared SQL schema" unless Digest::SHA256.file("db/structure.sql").hexdigest == schema_digest
 puts "Schema contracts agree; dedicated regression database is ready."
