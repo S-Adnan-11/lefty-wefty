@@ -1,6 +1,6 @@
 <% content_for :title, "Sale ##{@order.id} · Lefty-Wefty" %>
 <p><%= link_to "← Sales", orders_path %></p>
-<div class="page-heading"><div><p class="eyebrow"><%= sale_status(@order.state) %></p><h1>Sale #<%= @order.id %></h1></div><% if @order.draft? %><%= link_to "Edit draft", edit_order_path(@order), class: "button button-secondary" %><% end %></div>
+<div class="page-heading"><div><p class="eyebrow"><%= sale_status(@order.state) %></p><h1>Sale #<%= @order.id %></h1></div><% if @order.draft? %><%= link_to "Edit draft", edit_order_path(@order), class: "button" %><% end %></div>
 <% if @error %><div class="errors" role="alert"><%= @error %></div><% end %>
 <section class="card">
   <h2><%= @order.draft? ? "Review draft" : "Recorded sale" %></h2>
@@ -21,7 +21,7 @@
   <section class="card form-card"><h2>Ready to record?</h2><p>Recording this sale removes the listed quantities from stock. No money is collected by the app.</p>
     <%= form_with url: confirm_order_path(@order), data: { pending: true } do %>
       <%= hidden_field_tag :revision, @order.revision %><%= hidden_field_tag :review_token, @order.review_token %>
-      <%= submit_tag "Record sale" %><p role="status" data-submission-status></p>
+      <%= submit_tag "Record sale", class: "button-primary" %><p role="status" data-submission-status></p>
     <% end %>
   </section>
   <section class="archive-section"><h2>Discard draft</h2><p>Remove this draft without changing stock.</p><%= button_to "Discard draft", order_path(@order), method: :delete, params: { revision: @order.revision }, class: "button-danger" %></section>

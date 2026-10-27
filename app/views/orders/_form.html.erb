@@ -8,7 +8,7 @@
     <div id="sale-lines"><% @lines.each_with_index do |line, index| %><%= render "line", line: line, index: index %><% end %></div>
     <template id="sale-line-template"><%= render "line", line: {}, index: "__INDEX__" %></template>
     <button type="button" class="button-secondary" id="add-sale-line" hidden>Add product line</button>
-    <%= submit_tag "Save draft for review" %>
+    <%= submit_tag "Save draft for review", class: "button-primary" %>
     <p class="muted" role="status" data-submission-status></p>
   <% end %>
 </div>

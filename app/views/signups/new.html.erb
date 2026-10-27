@@ -9,7 +9,7 @@
     <div><%= form.label :email_address, "Email address" %><%= form.email_field :email_address, required: true, maxlength: 254, autocomplete: "email" %></div>
     <div><%= form.label :password %><%= form.password_field :password, required: true, minlength: 12, maxlength: 72, autocomplete: "new-password", aria: { describedby: "password-help" } %><small id="password-help">Use 12–72 characters. A long, unique passphrase works well.</small></div>
     <div><%= form.label :password_confirmation, "Confirm password" %><%= form.password_field :password_confirmation, required: true, autocomplete: "new-password" %></div>
-    <%= form.submit "Create account" %>
+    <%= form.submit "Create account", class: "button-primary" %>
   <% end %>
   <p>Already have an account? <%= link_to "Log in", new_session_path %></p>
 </div>

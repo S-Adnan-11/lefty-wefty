@@ -1,6 +1,6 @@
 <% content_for :title, "#{@product.name} · Lefty-Wefty" %>
 <p><%= link_to "← Products", products_path %></p>
-<div class="page-heading"><div><p class="eyebrow"><%= @product.sku %></p><h1><%= @product.name %></h1><%= stock_badge(@product) %></div><%= link_to "Edit product", edit_product_path(@product), class: "button button-secondary" %></div>
+<div class="page-heading"><div><p class="eyebrow"><%= @product.sku %></p><h1><%= @product.name %></h1><%= stock_badge(@product) %></div><%= link_to "Edit product", edit_product_path(@product), class: "button" %></div>
 <div class="metrics">
   <div class="card"><span>Current quantity</span><strong id="quantity"><%= number_with_delimiter(@product.quantity) %></strong></div>
   <div class="card"><span>Selling price</span><strong class="price"><%= money_minor(@product.price_minor) %></strong></div>
@@ -19,7 +19,7 @@
       <div><%= label_tag "stock_change_direction", "Correction direction" %><%= select_tag "stock_change[direction]", options_for_select([["Add to stock", "add"], ["Remove from stock", "remove"]], @direction || "add"), id: "stock_change_direction", aria: { describedby: "direction-help" } %><small id="direction-help">Applies to corrections. Receiving stock always adds units.</small></div>
       <div><%= form.label :quantity, "Quantity" %><%= render "shared/quantity", name: "stock_change[quantity]", id: "stock_change_quantity", value: @quantity_input || @change.quantity, min: 1, label: "Quantity", describedby: "quantity-help stock_change-errors" %><small id="quantity-help">Enter the number of units. Stock cannot fall below zero.</small></div>
       <div><%= form.label :reason, "Reason (required for corrections)" %><%= form.text_area :reason, maxlength: 500, rows: 2 %></div>
-      <%= form.submit "Record stock change" %>
+      <%= form.submit "Record stock change", class: "button-primary" %>
     <% end %>
   </section>
 <% end %>

@@ -7,6 +7,6 @@
     <div class="logo-settings"><div class="logo-frame logo-large" id="logo-preview"><%= business_avatar(@business) %></div><div><h2>Business logo</h2><p class="muted">Use PNG, JPEG or WebP, up to 2 MB. Still images only, up to 4096 pixels per side and 8 million pixels in total. Your whole logo fits inside the frame.</p></div></div>
     <div><%= form.label :logo, @business.logo.attached? ? "Replace logo" : "Upload logo" %><%= form.file_field :logo, accept: "image/png,image/jpeg,image/webp", aria: { describedby: "logo-help" }, data: { logo_input: true } %><small id="logo-help">A preview appears after choosing a file. Save settings to keep it. If a save fails, choose the file again; your current logo stays in place.</small><p role="status" id="logo-preview-status"></p></div>
     <% if @business.logo.attached? %><div class="checkbox-row destructive-choice"><%= form.check_box :remove_logo %><%= form.label :remove_logo, "Remove the current logo and use business initials" %></div><% end %>
-    <%= form.submit "Save business settings" %>
+    <%= form.submit "Save business settings", class: "button-primary" %>
   <% end %>
 </section>
