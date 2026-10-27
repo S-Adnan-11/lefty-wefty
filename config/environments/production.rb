@@ -5,6 +5,12 @@ Rails.application.configure do
 
   # Code is not reloaded between requests.
   config.enable_reloading = false
+  config.active_job.queue_adapter = :inline
+  config.cache_store = :memory_store, { size: 8.megabytes }
+  config.x.public_origin = ENV.fetch("LEFTY_WEFTY_PUBLIC_ORIGIN", ProductionSettings::ORIGIN)
+  config.hosts = [ ProductionSettings::HOST ]
+  config.hosts << ENV["LEFTY_WEFTY_PREVIEW_HOST"] if ENV["LEFTY_WEFTY_PREVIEW_HOST"].present?
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
   # Eager load code on boot for better performance and memory savings (ignored by Rake tasks).
   config.eager_load = true
@@ -56,7 +62,7 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: ENV["LEFTY_WEFTY_APP_HOST"], protocol: "https" }
+  config.action_mailer.default_url_options = { host: ProductionSettings::HOST, protocol: "https" }
   config.action_mailer.show_previews = false
   config.action_mailer.logger = nil
 

@@ -1,5 +1,5 @@
 <meta name="description" content="<%= PublicSite::DESCRIPTION %>">
-<meta name="robots" content="<%= @public_introduction && PublicSite.indexing? ? 'index, follow' : 'noindex, nofollow' %>">
+<meta name="robots" content="<%= @public_introduction && PublicSite.indexing_for?(request) ? 'index, follow' : 'noindex, nofollow' %>">
 <meta name="theme-color" content="#F4F7F2">
 <meta name="application-name" content="Lefty-Wefty">
 <link rel="icon" href="/brand/icons/favicon.svg" type="image/svg+xml">
@@ -15,7 +15,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="<%= PublicSite::TITLE %>">
 <meta name="twitter:description" content="<%= PublicSite::DESCRIPTION %>">
-<% if PublicSite.indexing? %>
+<% if PublicSite.indexing_for?(request) %>
   <meta property="og:image" content="<%= PublicSite.url('/brand/social/og-image.png') %>">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">

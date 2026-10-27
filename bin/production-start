@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+require_relative "../lib/production_start"
+
+begin
+  raise ProductionSettings::Invalid, "The production entrypoint accepts no arguments." unless ARGV.empty?
+  ProductionStart.new.run
+rescue ProductionSettings::Invalid => error
+  abort error.message
+end

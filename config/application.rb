@@ -19,6 +19,7 @@ require "rails/test_unit/railtie"
 Bundler.require(*Rails.groups)
 require_relative "../lib/redacting_log_formatter"
 require_relative "../lib/search_indexing"
+require_relative "../lib/production_settings"
 
 module LeftyWefty
   class Application < Rails::Application
@@ -31,11 +32,12 @@ module LeftyWefty
     config.x.mail_sender = ENV["LEFTY_WEFTY_MAIL_FROM"]
     config.x.public_origin = ENV["LEFTY_WEFTY_PUBLIC_ORIGIN"]
     config.x.public_indexing = ENV["LEFTY_WEFTY_PUBLIC_INDEXING"] == "true"
-    config.middleware.insert_before ActionDispatch::ShowExceptions, SearchIndexing
+    config.middleware.insert_before 0, SearchIndexing
     # All logo reads go through the authenticated business controller.
     config.active_storage.draw_routes = false
     config.active_storage.analyzers = []
     config.active_storage.previewers = []
+    config.active_storage.variant_processor = :disabled
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.

@@ -1,0 +1,15 @@
+.git
+.github
+.bundle
+.local
+.env*
+config/master.key
+config/credentials*
+config/database.local.yml
+config/uploads.local.yml
+storage
+tmp
+log
+coverage
+public/assets
+vendor/bundle

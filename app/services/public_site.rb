@@ -22,6 +22,10 @@ class PublicSite
     Rails.application.config.x.public_indexing == true && origin.present?
   end
 
+  def self.indexing_for?(request)
+    indexing? && (!Rails.env.production? || request.host.downcase == URI.parse(origin).host)
+  end
+
   def self.url(path = "/")
     "#{origin}#{path}" if indexing?
   end

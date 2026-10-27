@@ -68,7 +68,7 @@ Copy `config/uploads.local.yml.example` to the ignored `config/uploads.local.yml
 
 Back up the upload directory, database (including Active Storage metadata), local configuration, and Rails credentials/key together. Original logo files and sanitized display images are both needed. Restoring the database alone does not restore files. Keep ImageMagick and the repository's `config/image_policy/policy.xml` available after restoration.
 
-Production requires an explicitly configured persistent upload root or a named service using `LEFTY_WEFTY_STORAGE_SERVICE` and a corresponding Rails storage configuration. A provider and its persistence must be verified before accepting live uploads; no hosted storage provider is included. An ephemeral web-service filesystem is unsuitable for durable logos.
+Production requires private S3-compatible object storage using `LEFTY_WEFTY_STORAGE_SERVICE=s3`; disk storage is reserved for development/tests. Both original and sanitized logos must persist outside an ephemeral web filesystem. Provider access and persistence must be verified before accepting live uploads. See [production setup](docs/production.md) and the [environment example](config/production.env.example).
 
 ### Fictional sample data and local recovery
 
@@ -78,7 +78,7 @@ In development, **Forgot your password?** prepares a reset message in Action Mai
 
 The [development mail preview](http://localhost:3000/rails/mailers/passwords_mailer/reset) shows the HTML/plain-text templates with a fictional address and an unusable link. It does not look up accounts or retrieve a requested message, and an `email` query parameter does not select a user. For local request/capture testing, use one Rails console process with a disposable account and `app.post "/passwords", params: { email_address: "your-disposable-address@example.test" }`; inspect the corresponding `ActionMailer::Base.deliveries.last` in that process. Deliveries in a running web server are not shared with a separate console. Treat messages and reset links as credentials; keep them out of logs, screenshots and source control.
 
-Production previews and recovery delivery are disabled. External email remains unconfigured and unverified. Before enabling `config.x.password_recovery_delivery = :email`, configure and verify the mail transport, an owned `LEFTY_WEFTY_MAIL_FROM` sender and `LEFTY_WEFTY_APP_HOST` host. Development uses the reserved `example.test` sender only for local capture. No SMTP account or hosted email service is included.
+Production previews are disabled. Recovery remains unavailable until explicitly configured with a verified domain sender and the Brevo HTTPS API. The transport preserves HTML/plain text and fixed HTTPS production links; it does not use SMTP. Provider acceptance and inbox delivery require separate verification. Development uses the reserved `example.test` sender only for local capture. See [recovery email setup](docs/production.md#recovery-email).
 
 ## Using stock
 

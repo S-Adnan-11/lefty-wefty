@@ -19,5 +19,6 @@ test:
 
 production:
   adapter: postgresql
-  url: <%= ENV["DATABASE_URL"].to_json %>
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  url: <%= (Rails.env.production? && !ProductionSettings.assets_build? ? ProductionSettings.database_url(ENV["DATABASE_URL"]) : ENV["DATABASE_URL"]).to_json %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 2) %>
+  prepared_statements: false

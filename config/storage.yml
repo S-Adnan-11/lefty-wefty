@@ -6,3 +6,21 @@ local:
 test:
   service: Disk
   root: <%= Rails.root.join("tmp/test-uploads").to_s.to_json %>
+s3:
+  service: S3
+  endpoint: <%= ENV["LEFTY_WEFTY_S3_ENDPOINT"].to_json %>
+  region: <%= ENV["LEFTY_WEFTY_S3_REGION"].to_json %>
+  bucket: <%= ENV["LEFTY_WEFTY_S3_BUCKET"].to_json %>
+  access_key_id: <%= ENV["LEFTY_WEFTY_S3_ACCESS_KEY_ID"].to_json %>
+  secret_access_key: <%= ENV["LEFTY_WEFTY_S3_SECRET_ACCESS_KEY"].to_json %>
+  force_path_style: true
+  public: false
+  ssl_verify_peer: true
+  <% if ENV["LEFTY_WEFTY_S3_CA_BUNDLE"].present? %>
+  ssl_ca_bundle: <%= ENV["LEFTY_WEFTY_S3_CA_BUNDLE"].to_json %>
+  <% end %>
+  retry_limit: 1
+  http_open_timeout: 3
+  http_read_timeout: 5
+  request_checksum_calculation: when_required
+  response_checksum_validation: when_required

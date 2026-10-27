@@ -11,12 +11,16 @@ class PasswordsController < ApplicationController
 
   def create
     if user = User.find_by(email_address: params.permit(:email_address)[:email_address].to_s)
-      PasswordsMailer.reset(user).deliver_now
+      begin
+        PasswordsMailer.reset(user).deliver_now
+      rescue BrevoDelivery::Failed => error
+        Rails.logger.warn("Password recovery delivery failed (#{error.reason}).")
+      end
     end
 
     notice = password_recovery_mode == :local ?
       "If an account matches that email, a reset link has been prepared." :
-      "If an account matches that email, a reset link has been sent."
+      "If an account matches that email, a reset email has been requested."
     redirect_to new_session_path, notice: notice
   end
 
