@@ -113,20 +113,24 @@ fingerprint = -> do
   tables.to_h { |table| [ table, connection.exec("SELECT md5(COALESCE(string_agg(to_jsonb(t)::text, '' ORDER BY id), '')) FROM #{table} t").getvalue(0, 0) ] }
 end
 before = fingerprint.call
-failure = File.join(directory, "20991231235959_failure_probe.rb")
+migration_version = Time.now.utc.strftime("%Y%m%d%H%M%S")
+failure = File.join(directory, "#{migration_version}_failure_probe.rb")
 File.write(failure, <<~RUBY)
   class FailureProbe < ActiveRecord::Migration[8.1]
     def change
       create_table(:ci_failure_marker) { |table| table.string :name }
+      puts "Disposable migration DDL was executed."
       raise "Disposable migration failure"
     end
   end
 RUBY
 output, error, failure_status = Open3.capture3("docker", "run", "--name", "lefty-wefty-ci-failed-start", "--network", network,
-  "--env-file", production_env, "--volume", "#{directory}:/ci:ro", "--volume", "#{failure}:/rails/db/migrate/20991231235959_failure_probe.rb:ro", "lefty-wefty-ci")
+  "--env-file", production_env, "--volume", "#{directory}:/ci:ro", "--volume", "#{failure}:/rails/db/migrate/#{File.basename(failure)}:ro", "lefty-wefty-ci")
 File.write(File.join(directory, "expected-migration-failure.txt"), output + error, perm: 0o600)
 raise "Expected migration to prevent startup" if failure_status.success?
+raise "Negative migration did not exercise its DDL" unless (output + error).include?("Disposable migration DDL was executed.")
 raise "Failed migration left a partial table" unless connection.exec("SELECT to_regclass('public.ci_failure_marker')").getvalue(0, 0).nil?
+raise "Failed migration was recorded as complete" unless connection.exec_params("SELECT count(*) FROM schema_migrations WHERE version=$1", [ migration_version ]).getvalue(0, 0) == "0"
 raise "Failed migration altered application rows" unless fingerprint.call == before
 running = command!("docker", "inspect", "--format", "{{.State.Running}}", "lefty-wefty-ci-failed-start").strip
 raise "An incompatible web process started" unless running == "false"

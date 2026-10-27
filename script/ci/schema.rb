@@ -50,14 +50,19 @@ end
       Stock::Apply.call(business: business, actor: owner, product_id: product.id, change: StockChange.new(kind: "receipt", quantity: 7, operation_key: SecureRandom.uuid))
     RUBY
     command!(env, "bundle", "exec", "ruby", "bin/rails", "runner", "-", input: code)
-    before = %w[users businesses products inventory_logs].to_h do |table|
-      [ table, connection.exec("SELECT md5(string_agg(to_jsonb(t)::text, '' ORDER BY id)) FROM #{table} t").getvalue(0, 0) ]
+    columns = %w[users businesses products inventory_logs].to_h do |table|
+      names = connection.exec_params("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 ORDER BY ordinal_position", [ table ]).values.flatten
+      [ table, names.map { |name| connection.quote_ident(name) }.join(", ") ]
+    end
+    before = columns.to_h do |table, projection|
+      [ table, connection.exec("SELECT md5(string_agg(to_jsonb(t)::text, '' ORDER BY id)) FROM (SELECT #{projection} FROM #{table}) t").getvalue(0, 0) ]
     end
     migrate_to!(env)
-    after = before.keys.to_h do |table|
-      [ table, connection.exec("SELECT md5(string_agg(to_jsonb(t)::text, '' ORDER BY id)) FROM #{table} t").getvalue(0, 0) ]
+    after = columns.to_h do |table, projection|
+      [ table, connection.exec("SELECT md5(string_agg(to_jsonb(t)::text, '' ORDER BY id)) FROM (SELECT #{projection} FROM #{table}) t").getvalue(0, 0) ]
     end
     raise "Upgrade altered existing records" unless before == after
+    raise "Upgrade linked legacy stock to a new sale" unless connection.exec("SELECT count(*) FROM inventory_logs WHERE order_item_id IS NOT NULL OR reversal_of_id IS NOT NULL").getvalue(0, 0) == "0"
   end
   contract = {
     constraints: connection.exec("SELECT conrelid::regclass::text, conname, pg_get_constraintdef(oid) FROM pg_constraint WHERE connamespace='public'::regnamespace ORDER BY 1,2").values,

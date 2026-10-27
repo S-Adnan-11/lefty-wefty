@@ -1,6 +1,7 @@
 require "action_dispatch/testing/integration"
 require "rack/test"
 require "digest"
+require "open3"
 
 targets = { "lefty_wefty_ci_production" => "lefty-wefty-ci-logos", "lefty_wefty_restore_ci" => "lefty-wefty-ci-restore" }
 unless Rails.env.production? && ENV["GITHUB_ACTIONS"] == "true" && ENV["LEFTY_WEFTY_CI_PROBE"] == "true" &&
@@ -10,6 +11,10 @@ end
 raise "Expected private S3 service" unless ActiveStorage::Blob.service.is_a?(ActiveStorage::Service::S3Service)
 raise "Jobs must run synchronously" unless ActiveJob::Base.queue_adapter.is_a?(ActiveJob::QueueAdapters::InlineAdapter)
 raise "Recovery must remain unavailable" unless Rails.application.config.x.password_recovery_delivery == :unavailable
+image_version, image_status = Open3.capture2("magick", "-version")
+raise "Unexpected native image-processing version" unless image_status.success? && image_version.include?("ImageMagick 7.1.2-34 Q8")
+raise "Unexpected production Ruby or Rails version" unless RUBY_VERSION == "3.4.12" && Rails.version == "8.1.4"
+raise "System CA trust requires libpq 17 or newer" unless PG.library_version >= 170000
 
 def session
   ActionDispatch::Integration::Session.new(Rails.application).tap do |client|
