@@ -44,8 +44,10 @@ def sign_in(client, email: "smoke-owner@example.test")
   submit(client, :post, "/session", { email_address: email, password: ENV.fetch("LEFTY_WEFTY_SMOKE_PASSWORD") })
   raise "Expected login redirect" unless client.response.redirect?
   raise "Session cookie must be secure" unless Array(client.response.headers["set-cookie"]).join.downcase.include?("secure")
-  client.follow_redirect!
+  # A prior protected request may return to a route this fixture cannot access.
+  client.get "/"
   success!(client)
+  raise "Expected authenticated overview" unless document(client).at_css("h1")&.text == "Overview"
 end
 
 def create_fixture_owner(email, name)
