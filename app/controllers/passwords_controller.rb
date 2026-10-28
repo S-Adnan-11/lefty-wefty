@@ -61,7 +61,7 @@ class PasswordsController < ApplicationController
 
     def ensure_recovery_available
       unless %i[local email].include?(password_recovery_mode)
-        redirect_to new_password_path, alert: "Password recovery is not available on this installation yet."
+        redirect_to new_password_path, alert: "Password reset is currently unavailable."
       end
     end
 

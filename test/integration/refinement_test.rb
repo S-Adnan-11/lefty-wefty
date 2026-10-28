@@ -51,6 +51,8 @@ class RefinementTest < ActionDispatch::IntegrationTest
   end
 
   test "password changes require current password confirmation and rotate all sessions" do
+    original_recovery = Rails.application.config.x.password_recovery_delivery
+    Rails.application.config.x.password_recovery_delivery = :unavailable
     stale_session = @owner.sessions.create!
     original_sessions = @owner.sessions.pluck(:id)
     reset_token = @owner.password_reset_token
@@ -76,6 +78,8 @@ class RefinementTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "h1", "My account"
     assert_select "input[type=password][value]", count: 0
+  ensure
+    Rails.application.config.x.password_recovery_delivery = original_recovery
   end
 
   test "right aligned navigation retains all destinations and native no script help" do

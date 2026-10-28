@@ -24,7 +24,7 @@ The container entrypoint takes a PostgreSQL advisory lock, waits at most 30 seco
 
 After migration, the entrypoint removes the migration URL from the web process environment and replaces itself with Puma. There is one process with up to two request threads. The production listener uses 0.0.0.0 and the supplied PORT. Development retains its localhost-only listener. GET /up reports application boot health without account or business data.
 
-Create the first real account through the application after its HTTPS, storage and database checks pass. Do not run db:seed, db:reset or import a development database into a public instance.
+Public signup is disabled in production, including direct requests; existing owners can still log in. Establish the first owner through a trusted administrative Rails process after confirming the production database and HTTPS/storage checks. Supply a unique private password through protected input, and create the user and business in one transaction. Do not temporarily open public signup, publish shared credentials, run db:seed/db:reset or import a development database. Public demo access remains unavailable until a read-only workspace is implemented and verified.
 
 ## Private logos and background work
 
@@ -36,11 +36,9 @@ Jobs execute inline in production; no Redis or background-worker service is requ
 
 ## Recovery email
 
-Recovery is disabled by default in production. Set LEFTY_WEFTY_BREVO_ENABLED=true only after transactional access and an outbound sender under lefty-wefty.devs.surf or mail.lefty-wefty.devs.surf are verified. Configure BREVO_API_KEY and LEFTY_WEFTY_MAIL_FROM securely. A sending identity does not imply that a receiving mailbox exists.
+Keep LEFTY_WEFTY_BREVO_ENABLED=false and leave BREVO_API_KEY and LEFTY_WEFTY_MAIL_FROM unset. Password reset is currently unavailable. The server rejects reset requests and previously issued reset links without changing passwords or sessions. Production mail delivery and previews are disabled. Signed-in password changes still require the current password and rotate sessions. Development retains local capture and its fictional preview.
 
-The Brevo HTTPS API transport sends both branded HTML and plain text. Its HTML uses the public PNG logo at the configured production origin; local previews retain their inline PNG. An explicit throttle rejection can retry once with the same idempotency key and a short supported backoff. Ambiguous timeouts and other rejections are not retried automatically. Errors expose no provider response, API key, recipient or reset token. Known and unknown accounts receive the same acknowledgement.
-
-API acceptance is not proof of inbox delivery. Verify one recovery message later with an explicitly approved recipient, including link expiry, password reset, session revocation and reused-link rejection. Development retains local capture and its fictional preview.
+The optional delivery adapter remains in the source for future configuration; it is not part of this deployment.
 
 ## Domain and indexing
 
@@ -48,7 +46,7 @@ The intended origin is https://lefty-wefty.devs.surf. Production allows that hos
 
 Public indexing remains off until deliberately enabled after live checks. Preview-host requests remain noindex even when canonical-host indexing is enabled. Public canonical and share URLs come from the configured origin, never the request Host. Private/auth/token/error routes remain noindex and protected by authentication where required.
 
-Configure DNS only after the actual service hostname and verification values exist. Preserve unrelated records. A CNAME cannot share its owner name with TXT or other records; an independently verified mail subdomain can separate email authentication from web routing if the DNS service supports those child records. Do not add unowned aliases.
+Configure DNS only after the actual service hostname and verification values exist. Preserve unrelated records. A CNAME cannot share its owner name with TXT or other records. Do not add unowned aliases.
 
 ## Backup and restore
 

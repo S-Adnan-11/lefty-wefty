@@ -1,4 +1,8 @@
 module ApplicationHelper
+  def public_signup?
+    Rails.application.config.x.public_signup
+  end
+
   def money_minor(amount)
     "₦#{number_with_delimiter(amount / 100)}.#{format('%02d', amount % 100)}"
   end

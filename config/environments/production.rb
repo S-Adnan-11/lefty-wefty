@@ -5,6 +5,7 @@ Rails.application.configure do
 
   # Code is not reloaded between requests.
   config.enable_reloading = false
+  config.x.public_signup = false
   config.active_job.queue_adapter = :inline
   config.cache_store = :memory_store, { size: 8.megabytes }
   config.x.public_origin = ENV.fetch("LEFTY_WEFTY_PUBLIC_ORIGIN", ProductionSettings::ORIGIN)
@@ -64,6 +65,7 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: ProductionSettings::HOST, protocol: "https" }
   config.action_mailer.show_previews = false
+  config.action_mailer.perform_deliveries = ENV["LEFTY_WEFTY_BREVO_ENABLED"] == "true"
   config.action_mailer.logger = nil
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.

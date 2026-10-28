@@ -78,7 +78,9 @@ In development, **Forgot your password?** prepares a reset message in Action Mai
 
 The [development mail preview](http://localhost:3000/rails/mailers/passwords_mailer/reset) shows the HTML/plain-text templates with a fictional address and an unusable link. It does not look up accounts or retrieve a requested message, and an `email` query parameter does not select a user. For local request/capture testing, use one Rails console process with a disposable account and `app.post "/passwords", params: { email_address: "your-disposable-address@example.test" }`; inspect the corresponding `ActionMailer::Base.deliveries.last` in that process. Deliveries in a running web server are not shared with a separate console. Treat messages and reset links as credentials; keep them out of logs, screenshots and source control.
 
-Production previews are disabled. Recovery remains unavailable until explicitly configured with a verified domain sender and the Brevo HTTPS API. The transport preserves HTML/plain text and fixed HTTPS production links; it does not use SMTP. Provider acceptance and inbox delivery require separate verification. Development uses the reserved `example.test` sender only for local capture. See [recovery email setup](docs/production.md#recovery-email).
+Production password reset and mail previews are disabled. Previously issued reset links cannot change a password while recovery is disabled. Signed-in owners can still change their password from My account. Development uses the reserved `example.test` sender only for local capture. See [production setup](docs/production.md).
+
+Public signup is disabled in production. Existing owners can log in; no public demo credentials are provided. Local development retains account creation.
 
 ## Using stock
 

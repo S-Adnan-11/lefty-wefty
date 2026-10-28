@@ -1,6 +1,32 @@
 require "test_helper"
 
 class AccountsTest < ActionDispatch::IntegrationTest
+  test "closed signup hides links and rejects direct account creation while existing owners can log in" do
+    owner = create_owner
+    original_signup = Rails.application.config.x.public_signup
+    Rails.application.config.x.public_signup = false
+    [ root_path, new_session_path, new_password_path ].each do |path|
+      get path
+      assert_response :success
+      assert_select "a[href=?]", signup_path, count: 0
+    end
+    get signup_path
+    assert_response :not_found
+    assert_no_difference [ "User.count", "Business.count", "Session.count" ] do
+      post signup_path, params: {
+        user: { email_address: "new@example.test", password: "new owner passphrase", password_confirmation: "new owner passphrase" },
+        business: { name: "Unwanted public signup" }
+      }
+      assert_response :not_found
+    end
+    post session_path, params: { email_address: owner.email_address, password: "test owner passphrase" }
+    assert_redirected_to root_url
+    follow_redirect!
+    assert_select "h1", "Overview"
+  ensure
+    Rails.application.config.x.public_signup = original_signup
+  end
+
   test "signup creates one owner and server-owned business together" do
     foreign = create_owner(email: "other@example.test")
     assert_difference [ "User.count", "Business.count", "Session.count" ], 1 do

@@ -110,12 +110,42 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     get new_password_path
     assert_response :success
     assert_select "form[action=?]", passwords_path, count: 0
-    assert_select "p", /Password recovery is not available/
+    assert_select "p", "Password reset is currently unavailable."
     assert_no_emails { post passwords_path, params: { email_address: @user.email_address } }
     assert_redirected_to new_password_path
     get edit_password_path(@user.password_reset_token)
     assert_redirected_to new_password_path
     assert_raises(RuntimeError) { PasswordsMailer.reset(@user).message }
+  ensure
+    Rails.application.config.x.password_recovery_delivery = original
+  end
+
+  test "disabled recovery rejects direct submissions and previously issued tokens without changing credentials or sessions" do
+    token = @user.password_reset_token
+    old_session = @user.sessions.create!
+    digest = @user.password_digest
+    original = Rails.application.config.x.password_recovery_delivery
+    Rails.application.config.x.password_recovery_delivery = :unavailable
+
+    assert_no_emails do
+      [ @user.email_address, "missing@example.test" ].each do |email|
+        post passwords_path, params: { email_address: email }
+        assert_redirected_to new_password_path
+        assert_equal "Password reset is currently unavailable.", flash[:alert]
+        assert_nil flash[:notice]
+      end
+      [ token, "invalid" ].each do |value|
+        get edit_password_path(value)
+        assert_redirected_to new_password_path
+        %i[put patch].each do |verb|
+          public_send(verb, password_path(value), params: { password: "replacement test passphrase", password_confirmation: "replacement test passphrase" })
+          assert_redirected_to new_password_path
+          assert_equal "Password reset is currently unavailable.", flash[:alert]
+        end
+      end
+    end
+    assert_equal digest, @user.reload.password_digest
+    assert Session.exists?(old_session.id)
   ensure
     Rails.application.config.x.password_recovery_delivery = original
   end

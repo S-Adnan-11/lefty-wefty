@@ -29,6 +29,7 @@ module LeftyWefty
     config.active_job.queue_adapter = :async
     config.log_formatter = RedactingLogFormatter.new
     config.x.password_recovery_delivery = :unavailable
+    config.x.public_signup = true
     config.x.mail_sender = ENV["LEFTY_WEFTY_MAIL_FROM"]
     config.x.public_origin = ENV["LEFTY_WEFTY_PUBLIC_ORIGIN"]
     config.x.public_indexing = ENV["LEFTY_WEFTY_PUBLIC_INDEXING"] == "true"

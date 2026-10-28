@@ -1,5 +1,6 @@
 class SignupsController < ApplicationController
   allow_unauthenticated_access
+  before_action :ensure_signup_available
   rate_limit to: 5, within: 3.minutes, only: :create, store: Rails.application.config.x.authentication_rate_limit_store,
     with: -> { redirect_to signup_path, alert: "Try again later." }
 
@@ -21,4 +22,9 @@ class SignupsController < ApplicationController
     @user.errors.add(:email_address, "has already been taken")
     render :new, status: :unprocessable_entity
   end
+
+  private
+    def ensure_signup_available
+      head :not_found unless Rails.application.config.x.public_signup
+    end
 end

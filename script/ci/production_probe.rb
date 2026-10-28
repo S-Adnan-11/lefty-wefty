@@ -11,6 +11,8 @@ end
 raise "Expected private S3 service" unless ActiveStorage::Blob.service.is_a?(ActiveStorage::Service::S3Service)
 raise "Jobs must run synchronously" unless ActiveJob::Base.queue_adapter.is_a?(ActiveJob::QueueAdapters::InlineAdapter)
 raise "Recovery must remain unavailable" unless Rails.application.config.x.password_recovery_delivery == :unavailable
+raise "Mail delivery must remain disabled" if ActionMailer::Base.perform_deliveries
+raise "Public signup must remain disabled" if Rails.application.config.x.public_signup
 image_version, image_status = Open3.capture2("magick", "-version")
 raise "Unexpected native image-processing version" unless image_status.success? && image_version.include?("ImageMagick 7.1.2-34 Q8")
 raise "Unexpected production Ruby or Rails version" unless RUBY_VERSION == "3.4.12" && Rails.version == "8.1.4"
@@ -37,13 +39,21 @@ def success!(client, expected = 200)
   raise "Unexpected production response status" unless client.response.status == expected
 end
 
-def sign_in(client)
+def sign_in(client, email: "smoke-owner@example.test")
   client.get "/session/new"
-  submit(client, :post, "/session", { email_address: "smoke-owner@example.test", password: ENV.fetch("LEFTY_WEFTY_SMOKE_PASSWORD") })
+  submit(client, :post, "/session", { email_address: email, password: ENV.fetch("LEFTY_WEFTY_SMOKE_PASSWORD") })
   raise "Expected login redirect" unless client.response.redirect?
   raise "Session cookie must be secure" unless Array(client.response.headers["set-cookie"]).join.downcase.include?("secure")
   client.follow_redirect!
   success!(client)
+end
+
+def create_fixture_owner(email, name)
+  User.transaction do
+    owner = User.create!(email_address: email, password: ENV.fetch("LEFTY_WEFTY_SMOKE_PASSWORD"))
+    Business.create!(owner: owner, name: name)
+    owner
+  end
 end
 
 client = session
@@ -57,8 +67,19 @@ success!(client, 404)
 client.get "/passwords/new"
 success!(client)
 raise "Unconfigured recovery form exposed" if document(client).at_css('form[action="/passwords"]')
+raise "Recovery message differs" unless document(client).text.include?("Password reset is currently unavailable.")
+raise "Public signup link exposed" if document(client).at_css('a[href="/signup"]')
+submit(client, :post, "/passwords", { email_address: "unknown@example.test" })
+raise "Disabled recovery request accepted" unless client.response.redirect? && URI(client.response.location).path == "/passwords/new"
+client.follow_redirect!
+signup_counts = [ User.count, Business.count, Session.count ]
+submit(client, :post, "/signup", { user: { email_address: "blocked@example.test", password: "blocked test passphrase", password_confirmation: "blocked test passphrase" }, business: { name: "Blocked signup" } })
+success!(client, 404)
+raise "Closed signup created records" unless signup_counts == [ User.count, Business.count, Session.count ]
 client.get "/signup"
-client.post "/signup", params: { user: { email_address: "blocked@example.test" } }
+success!(client, 404)
+client.get "/session/new"
+client.post "/session", params: { email_address: "blocked@example.test" }
 success!(client, 422)
 foreign_host = session
 foreign_host.host! "untrusted.example"
@@ -91,12 +112,23 @@ if ARGV.first == "create"
   rescue Seahorse::Client::NetworkingError => error
     raise "Expected object-storage TLS rejection" unless error.original_error.is_a?(OpenSSL::SSL::SSLError)
   end
-  client.get "/signup"
-  password = ENV.fetch("LEFTY_WEFTY_SMOKE_PASSWORD")
-  submit(client, :post, "/signup", { user: { email_address: "smoke-owner@example.test", password: password, password_confirmation: password }, business: { name: "Test Business — Ọlá & Co." } })
-  raise "Signup failed" unless client.response.redirect?
+  owner = create_fixture_owner("smoke-owner@example.test", "Test Business — Ọlá & Co.")
+  old_session = owner.sessions.create!
+  original_digest = owner.password_digest
+  reset_token = owner.password_reset_token
+  client.get "/passwords/new"
+  submit(client, :post, "/passwords", { email_address: owner.email_address })
   client.follow_redirect!
-  success!(client)
+  client.get "/passwords/#{reset_token}/edit"
+  raise "Stale reset page exposed" unless client.response.redirect? && URI(client.response.location).path == "/passwords/new"
+  client.follow_redirect!
+  %i[put patch].each do |verb|
+    submit(client, verb, "/passwords/#{reset_token}", { password: "unwanted replacement passphrase", password_confirmation: "unwanted replacement passphrase" })
+    raise "Disabled password reset accepted" unless client.response.redirect? && URI(client.response.location).path == "/passwords/new"
+    client.follow_redirect!
+  end
+  raise "Disabled recovery mutated credentials or sessions" unless owner.reload.password_digest == original_digest && Session.exists?(old_session.id)
+  sign_in(client)
   raise "Overview heading missing" unless document(client).at_css("h1").text == "Overview"
   client.get "/products/new"
   submit(client, :post, "/products", { product: { name: "CI Product", price_naira: "1,250.50", low_stock_threshold: 2 }, opening_quantity: "5" })
@@ -140,16 +172,15 @@ if ARGV.first == "create"
   anonymous = session
   anonymous.get "/business_settings/logo"
   success!(anonymous, 302)
-  anonymous.get "/signup"
-  submit(anonymous, :post, "/signup", { user: { email_address: "other-smoke@example.test", password: password, password_confirmation: password }, business: { name: "Other CI Business" } })
-  anonymous.follow_redirect!
+  create_fixture_owner("other-smoke@example.test", "Other CI Business")
+  sign_in(anonymous, email: "other-smoke@example.test")
   anonymous.get "/business_settings/logo", params: { business_id: blobs.id }
   success!(anonymous, 404)
   anonymous.get "/products/#{product.id}"
   success!(anonymous, 404)
   anonymous.get "/rails/active_storage/blobs/redirect/#{blobs.logo.blob.signed_id}/logo.png"
   success!(anonymous, 404)
-  puts "Production HTTPS/CSRF/session, tenant workflow and private logo upload verified."
+  puts "Production closed signup, disabled recovery, HTTPS/CSRF/session, tenant workflow and private logo upload verified."
 elsif ARGV.first == "clone_verify"
   raise "Expected separate restore target" unless ActiveRecord::Base.connection_db_config.database == "lefty_wefty_restore_ci"
   sign_in(client)
